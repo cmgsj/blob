@@ -44,10 +44,6 @@ func (o *RenameOptions) Validate() error {
 }
 
 func (o *RenameOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	resp, err := f.BlobServiceClient().RenameFile(cmd.Context(), o.Request)
-	if err != nil {
-		return err
-	}
-	err = cmdutil.PrintJSON(o.IOStreams.Out, resp)
+	_, err := f.BlobServiceClient().RenameFile(cmd.Context(), o.Request)
 	return err
 }

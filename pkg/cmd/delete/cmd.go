@@ -43,10 +43,6 @@ func (o *DeleteOptions) Validate() error {
 }
 
 func (o *DeleteOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	resp, err := f.BlobServiceClient().DeleteFile(cmd.Context(), o.Request)
-	if err != nil {
-		return err
-	}
-	err = cmdutil.PrintJSON(o.IOStreams.Out, resp)
+	_, err := f.BlobServiceClient().DeleteFile(cmd.Context(), o.Request)
 	return err
 }

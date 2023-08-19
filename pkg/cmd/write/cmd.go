@@ -62,10 +62,6 @@ func (o *WriteOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 		return err
 	}
 	o.Request.Content = content
-	resp, err := f.BlobServiceClient().WriteFile(cmd.Context(), o.Request)
-	if err != nil {
-		return err
-	}
-	err = cmdutil.PrintJSON(o.IOStreams.Out, resp)
+	_, err = f.BlobServiceClient().WriteFile(cmd.Context(), o.Request)
 	return err
 }

@@ -35,18 +35,18 @@ func NewCmdBlob() *cobra.Command {
 		Run:     cmdutil.RunHelp,
 		Version: version.Version,
 	}
-	streams := o.IOStreams
-	stderr := streams.Err
 	ctx := context.Background()
 	cmd.SetContext(ctx)
-	factory, err := cmdutil.NewFactory(cmd.Context(), o.GRPCAddress)
+	streams := o.IOStreams
+	stderr := streams.Err
+	f, err := cmdutil.NewFactory(cmd.Context(), o.GRPCAddress)
 	cmdutil.CheckErr(err, stderr)
-	cmd.AddCommand(delete.NewCmdDelete(factory, streams))
-	cmd.AddCommand(get.NewCmdGet(factory, streams))
-	cmd.AddCommand(list.NewCmdList(factory, streams))
-	cmd.AddCommand(rename.NewCmdRename(factory, streams))
-	cmd.AddCommand(server.NewCmdServer(streams))
-	cmd.AddCommand(write.NewCmdWrite(factory, streams))
+	cmd.AddCommand(delete.NewCmdDelete(f, streams))
+	cmd.AddCommand(get.NewCmdGet(f, streams))
+	cmd.AddCommand(list.NewCmdList(f, streams))
+	cmd.AddCommand(rename.NewCmdRename(f, streams))
+	cmd.AddCommand(server.NewCmdServer(f, streams))
+	cmd.AddCommand(write.NewCmdWrite(f, streams))
 	cmd.PersistentFlags().StringVar(&o.HTTPAddress, "http-address", o.HTTPAddress, "blob server http address")
 	cmd.PersistentFlags().StringVar(&o.GRPCAddress, "grpc-address", o.GRPCAddress, "blob server grpc address")
 	return cmd

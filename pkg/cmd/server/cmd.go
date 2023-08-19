@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/cmgsj/blob/pkg/cmd/server/health"
 	"github.com/cmgsj/blob/pkg/cmd/server/start"
 	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
 	"github.com/spf13/cobra"
@@ -16,12 +17,13 @@ func NewServerOptions(streams cmdutil.IOStreams) *ServerOptions {
 	}
 }
 
-func NewCmdServer(streams cmdutil.IOStreams) *cobra.Command {
+func NewCmdServer(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 	_ = NewServerOptions(streams)
 	cmd := &cobra.Command{
 		Use: "server",
 		Run: cmdutil.RunHelp,
 	}
 	cmd.AddCommand(start.NewCmdStart(streams))
+	cmd.AddCommand(health.NewCmdHealth(f, streams))
 	return cmd
 }
