@@ -11,6 +11,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+var (
+	ServiceName = blobv1.BlobService_ServiceDesc.ServiceName
+)
+
 type Server struct {
 	blobv1.UnimplementedBlobServiceServer
 	mu sync.RWMutex
@@ -18,7 +22,9 @@ type Server struct {
 }
 
 func NewServer() blobv1.BlobServiceServer {
-	return &Server{fs: afero.NewMemMapFs()}
+	return &Server{
+		fs: afero.NewMemMapFs(),
+	}
 }
 
 func (s *Server) ListFiles(ctx context.Context, req *blobv1.ListFilesRequest) (*blobv1.ListFilesResponse, error) {

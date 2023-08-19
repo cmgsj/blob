@@ -1,6 +1,7 @@
 package health
 
 import (
+	"github.com/cmgsj/blob/pkg/blob"
 	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
 	"github.com/spf13/cobra"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
@@ -14,7 +15,9 @@ type HealthOptions struct {
 func NewWriteOptions(streams cmdutil.IOStreams) *HealthOptions {
 	return &HealthOptions{
 		IOStreams: streams,
-		Request:   &healthv1.HealthCheckRequest{},
+		Request: &healthv1.HealthCheckRequest{
+			Service: blob.ServiceName,
+		},
 	}
 }
 
@@ -30,7 +33,6 @@ func NewCmdHealth(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 			cmdutil.CheckErr(o.Run(f, cmd), stderr)
 		},
 	}
-	cmd.Flags().StringVar(&o.Request.Service, "service", o.Request.Service, "service to health check")
 	return cmd
 }
 
@@ -48,7 +50,8 @@ func (o *HealthOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 		return err
 	}
 	v := map[string]string{
-		"status": healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())],
+		"service": o.Request.GetService(),
+		"status":  healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())],
 	}
 	err = cmdutil.PrintJSON(o.IOStreams.Out, v)
 	return err

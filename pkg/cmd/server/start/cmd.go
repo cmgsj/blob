@@ -66,13 +66,18 @@ func (o *StartOptions) Validate() error {
 }
 
 func (o *StartOptions) Run() error {
-	gs := grpc.NewServer(
+	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptors.ServerUnaryLogger),
 		grpc.StreamInterceptor(interceptors.ServerStreamLogger),
 	)
-	reflection.Register(gs)
-	healthv1.RegisterHealthServer(gs, health.NewServer())
-	blobv1.RegisterBlobServiceServer(gs, blob.NewServer())
+	healthServer := health.NewServer()
+	blobServer := blob.NewServer()
+
+	reflection.Register(grpcServer)
+	healthv1.RegisterHealthServer(grpcServer, healthServer)
+	blobv1.RegisterBlobServiceServer(grpcServer, blobServer)
+
+	healthServer.SetServingStatus(blob.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
 	rmux := runtime.NewServeMux()
 	ctx := context.Background()
@@ -110,7 +115,7 @@ func (o *StartOptions) Run() error {
 			errch <- err
 		}
 		slog.Info("started listening", "protocol", "grpc", "address", o.GrpcAddr)
-		err = gs.Serve(lis)
+		err = grpcServer.Serve(lis)
 		if err != nil {
 			errch <- err
 		}
