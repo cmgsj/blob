@@ -15,7 +15,6 @@ import (
 	"github.com/cmgsj/blob/pkg/openapi"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
@@ -33,22 +32,23 @@ func NewStartOptions(streams cmdutil.IOStreams) *StartOptions {
 	}
 }
 
-func NewCmdStart(streams cmdutil.IOStreams) *cobra.Command {
+func NewCmdStart(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 	o := NewStartOptions(streams)
 	cmd := &cobra.Command{
-		Use:  "start",
-		Args: cobra.NoArgs,
+		Use:   "start",
+		Short: "start blob server",
+		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			stderr := o.IOStreams.Err
-			cmdutil.CheckErr(o.Complete(cmd, args), stderr)
+			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
 			cmdutil.CheckErr(o.Validate(), stderr)
-			cmdutil.CheckErr(o.Run(), stderr)
+			cmdutil.CheckErr(o.Run(f, cmd), stderr)
 		},
 	}
 	return cmd
 }
 
-func (o *StartOptions) Complete(cmd *cobra.Command, args []string) error {
+func (o *StartOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
 	var err error
 	o.HttpAddr, err = cmd.Flags().GetString("http-address")
 	if err != nil {
@@ -65,10 +65,12 @@ func (o *StartOptions) Validate() error {
 	return nil
 }
 
-func (o *StartOptions) Run() error {
+func (o *StartOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
+	logger := interceptors.NewLogger()
+
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(interceptors.ServerUnaryLogger),
-		grpc.StreamInterceptor(interceptors.ServerStreamLogger),
+		grpc.UnaryInterceptor(logger.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(logger.StreamServerInterceptor()),
 	)
 	healthServer := health.NewServer()
 	blobServer := blob.NewServer()
@@ -81,12 +83,7 @@ func (o *StartOptions) Run() error {
 
 	rmux := runtime.NewServeMux()
 	ctx := context.Background()
-	opts := []grpc.DialOption{
-		grpc.WithUnaryInterceptor(interceptors.ClientUnaryLogger),
-		grpc.WithStreamInterceptor(interceptors.ClientStreamLogger),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}
-	err := blobv1.RegisterBlobServiceHandlerFromEndpoint(ctx, rmux, o.GrpcAddr, opts)
+	err := blobv1.RegisterBlobServiceHandlerClient(ctx, rmux, f.BlobServiceClient())
 	if err != nil {
 		return err
 	}

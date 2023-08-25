@@ -1,22 +1,16 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "A Bit of Everything",
-    "version": "1.0",
-    "contact": {
-      "name": "gRPC-Gateway project",
-      "url": "https://github.com/grpc-ecosystem/grpc-gateway",
-      "email": "none@example.com"
-    },
-    "license": {
-      "name": "BSD 3-Clause License",
-      "url": "https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE.txt"
-    },
-    "x-something-something": "yadda"
+    "title": "Blob Service API",
+    "version": "1.0"
   },
   "tags": [
     {
       "name": "BlobService"
+    },
+    {
+      "name": "v1.blob",
+      "description": "Blob Service API"
     }
   ],
   "schemes": [
@@ -32,12 +26,13 @@
   "paths": {
     "/api/v1/blob": {
       "get": {
-        "operationId": "BlobService_ListFiles",
+        "summary": "List blobs",
+        "operationId": "list-blobs",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ListFilesResponse"
+              "$ref": "#/definitions/v1ListBlobsResponse"
             }
           },
           "default": {
@@ -56,18 +51,24 @@
           }
         ],
         "tags": [
-          "BlobService"
+          "v1.blob"
+        ],
+        "security": [
+          {
+            "APIKeyAuth": []
+          }
         ]
       }
     },
-    "/api/v1/blob/{fileName}": {
+    "/api/v1/blob/{blobName}": {
       "get": {
-        "operationId": "BlobService_GetFile",
+        "summary": "Get blob",
+        "operationId": "get-blob",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetFileResponse"
+              "$ref": "#/definitions/v1GetBlobResponse"
             }
           },
           "default": {
@@ -79,23 +80,29 @@
         },
         "parameters": [
           {
-            "name": "fileName",
+            "name": "blobName",
             "in": "path",
             "required": true,
             "type": "string"
           }
         ],
         "tags": [
-          "BlobService"
+          "v1.blob"
+        ],
+        "security": [
+          {
+            "APIKeyAuth": []
+          }
         ]
       },
       "delete": {
-        "operationId": "BlobService_DeleteFile",
+        "summary": "Remove blob",
+        "operationId": "remove-blob",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1DeleteFileResponse"
+              "$ref": "#/definitions/v1RemoveBlobResponse"
             }
           },
           "default": {
@@ -107,23 +114,29 @@
         },
         "parameters": [
           {
-            "name": "fileName",
+            "name": "blobName",
             "in": "path",
             "required": true,
             "type": "string"
           }
         ],
         "tags": [
-          "BlobService"
+          "v1.blob"
+        ],
+        "security": [
+          {
+            "APIKeyAuth": []
+          }
         ]
       },
       "post": {
-        "operationId": "BlobService_WriteFile",
+        "summary": "Write blob",
+        "operationId": "write-blob",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1WriteFileResponse"
+              "$ref": "#/definitions/v1WriteBlobResponse"
             }
           },
           "default": {
@@ -135,7 +148,7 @@
         },
         "parameters": [
           {
-            "name": "fileName",
+            "name": "blobName",
             "in": "path",
             "required": true,
             "type": "string"
@@ -147,9 +160,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "isDir": {
-                  "type": "boolean"
-                },
                 "content": {
                   "type": "string",
                   "format": "byte"
@@ -159,48 +169,12 @@
           }
         ],
         "tags": [
-          "BlobService"
-        ]
-      },
-      "patch": {
-        "operationId": "BlobService_RenameFile",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1RenameFileResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "fileName",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "newFileName": {
-                  "type": "string"
-                }
-              }
-            }
-          }
+          "v1.blob"
         ],
-        "tags": [
-          "BlobService"
+        "security": [
+          {
+            "APIKeyAuth": []
+          }
         ]
       }
     }
@@ -234,100 +208,62 @@
         }
       }
     },
-    "v1DeleteFileResponse": {
-      "type": "object"
-    },
-    "v1File": {
+    "v1Blob": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string"
         },
-        "size": {
-          "type": "string",
-          "format": "int64"
-        },
-        "modTime": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "isDir": {
-          "type": "boolean"
-        },
         "content": {
           "type": "string",
           "format": "byte"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
-    "v1GetFileResponse": {
+    "v1GetBlobResponse": {
       "type": "object",
       "properties": {
-        "file": {
-          "$ref": "#/definitions/v1File"
+        "blob": {
+          "$ref": "#/definitions/v1Blob"
         }
       }
     },
-    "v1ListFilesResponse": {
+    "v1ListBlobsResponse": {
       "type": "object",
       "properties": {
-        "files": {
+        "blobNames": {
           "type": "array",
           "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1File"
+            "type": "string"
           }
+        },
+        "count": {
+          "type": "string",
+          "format": "uint64"
         }
       }
     },
-    "v1RenameFileResponse": {
+    "v1RemoveBlobResponse": {
       "type": "object"
     },
-    "v1WriteFileResponse": {
+    "v1WriteBlobResponse": {
       "type": "object"
     }
   },
   "securityDefinitions": {
-    "ApiKeyAuth": {
+    "APIKeyAuth": {
       "type": "apiKey",
       "name": "X-API-Key",
-      "in": "header",
-      "x-amazon-apigateway-authorizer": {
-        "authorizerResultTtlInSeconds": 60,
-        "type": "token"
-      },
-      "x-amazon-apigateway-authtype": "oauth2"
-    },
-    "BasicAuth": {
-      "type": "basic"
-    },
-    "OAuth2": {
-      "type": "oauth2",
-      "flow": "accessCode",
-      "authorizationUrl": "https://example.com/oauth/authorize",
-      "tokenUrl": "https://example.com/oauth/token",
-      "scopes": {
-        "admin": "Grants read and write access to administrative information",
-        "read": "Grants read access",
-        "write": "Grants write access"
-      }
+      "in": "header"
     }
   },
   "security": [
     {
-      "ApiKeyAuth": [],
-      "BasicAuth": []
-    },
-    {
-      "ApiKeyAuth": [],
-      "OAuth2": [
-        "read",
-        "write"
-      ]
+      "APIKeyAuth": []
     }
-  ],
-  "externalDocs": {
-    "description": "More about gRPC-Gateway",
-    "url": "https://github.com/grpc-ecosystem/grpc-gateway"
-  }
+  ]
 }

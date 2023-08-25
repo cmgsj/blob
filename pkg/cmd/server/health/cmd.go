@@ -24,8 +24,9 @@ func NewWriteOptions(streams cmdutil.IOStreams) *HealthOptions {
 func NewCmdHealth(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 	o := NewWriteOptions(streams)
 	cmd := &cobra.Command{
-		Use:  "health",
-		Args: cobra.NoArgs,
+		Use:   "health",
+		Short: "health-check blob server",
+		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			stderr := o.IOStreams.Err
 			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)

@@ -8,21 +8,23 @@ import (
 
 type GetOptions struct {
 	IOStreams cmdutil.IOStreams
-	Request   *blobv1.GetFileRequest
+	Request   *blobv1.GetBlobRequest
 }
 
 func NewGetOptions(streams cmdutil.IOStreams) *GetOptions {
 	return &GetOptions{
 		IOStreams: streams,
-		Request:   &blobv1.GetFileRequest{},
+		Request:   &blobv1.GetBlobRequest{},
 	}
 }
 
 func NewCmdGet(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 	o := NewGetOptions(streams)
 	cmd := &cobra.Command{
-		Use:  "get",
-		Args: cobra.ExactArgs(1),
+		Use:     "get",
+		Aliases: []string{"g"},
+		Short:   "get blob",
+		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			stderr := o.IOStreams.Err
 			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
@@ -34,7 +36,7 @@ func NewCmdGet(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 }
 
 func (o *GetOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
-	o.Request.FileName = args[0]
+	o.Request.BlobName = args[0]
 	return nil
 }
 
@@ -43,7 +45,7 @@ func (o *GetOptions) Validate() error {
 }
 
 func (o *GetOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	resp, err := f.BlobServiceClient().GetFile(cmd.Context(), o.Request)
+	resp, err := f.BlobServiceClient().GetBlob(cmd.Context(), o.Request)
 	if err != nil {
 		return err
 	}

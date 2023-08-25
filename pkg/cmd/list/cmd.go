@@ -8,13 +8,13 @@ import (
 
 type ListOptions struct {
 	IOStreams cmdutil.IOStreams
-	Request   *blobv1.ListFilesRequest
+	Request   *blobv1.ListBlobsRequest
 }
 
 func NewListOptions(streams cmdutil.IOStreams) *ListOptions {
 	return &ListOptions{
 		IOStreams: streams,
-		Request: &blobv1.ListFilesRequest{
+		Request: &blobv1.ListBlobsRequest{
 			Path: "/",
 		},
 	}
@@ -23,8 +23,10 @@ func NewListOptions(streams cmdutil.IOStreams) *ListOptions {
 func NewCmdList(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 	o := NewListOptions(streams)
 	cmd := &cobra.Command{
-		Use:  "list",
-		Args: cobra.MaximumNArgs(1),
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "list blobs",
+		Args:    cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			stderr := o.IOStreams.Err
 			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
@@ -47,9 +49,12 @@ func (o *ListOptions) Validate() error {
 }
 
 func (o *ListOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	resp, err := f.BlobServiceClient().ListFiles(cmd.Context(), o.Request)
+	resp, err := f.BlobServiceClient().ListBlobs(cmd.Context(), o.Request)
 	if err != nil {
 		return err
+	}
+	if resp.GetCount() == 0 {
+		return nil
 	}
 	err = cmdutil.PrintJSON(o.IOStreams.Out, resp)
 	return err

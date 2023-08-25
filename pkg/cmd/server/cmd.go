@@ -20,10 +20,11 @@ func NewServerOptions(streams cmdutil.IOStreams) *ServerOptions {
 func NewCmdServer(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
 	_ = NewServerOptions(streams)
 	cmd := &cobra.Command{
-		Use: "server",
-		Run: cmdutil.RunHelp,
+		Use:   "server",
+		Short: "blob server",
+		Run:   cmdutil.RunHelp,
 	}
-	cmd.AddCommand(start.NewCmdStart(streams))
+	cmd.AddCommand(start.NewCmdStart(f, streams))
 	cmd.AddCommand(health.NewCmdHealth(f, streams))
 	return cmd
 }

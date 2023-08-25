@@ -19,22 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	BlobService_ListFiles_FullMethodName  = "/blob.v1.BlobService/ListFiles"
-	BlobService_GetFile_FullMethodName    = "/blob.v1.BlobService/GetFile"
-	BlobService_WriteFile_FullMethodName  = "/blob.v1.BlobService/WriteFile"
-	BlobService_RenameFile_FullMethodName = "/blob.v1.BlobService/RenameFile"
-	BlobService_DeleteFile_FullMethodName = "/blob.v1.BlobService/DeleteFile"
+	BlobService_ListBlobs_FullMethodName  = "/blob.v1.BlobService/ListBlobs"
+	BlobService_GetBlob_FullMethodName    = "/blob.v1.BlobService/GetBlob"
+	BlobService_WriteBlob_FullMethodName  = "/blob.v1.BlobService/WriteBlob"
+	BlobService_RemoveBlob_FullMethodName = "/blob.v1.BlobService/RemoveBlob"
 )
 
 // BlobServiceClient is the client API for BlobService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BlobServiceClient interface {
-	ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error)
-	GetFile(ctx context.Context, in *GetFileRequest, opts ...grpc.CallOption) (*GetFileResponse, error)
-	WriteFile(ctx context.Context, in *WriteFileRequest, opts ...grpc.CallOption) (*WriteFileResponse, error)
-	RenameFile(ctx context.Context, in *RenameFileRequest, opts ...grpc.CallOption) (*RenameFileResponse, error)
-	DeleteFile(ctx context.Context, in *DeleteFileRequest, opts ...grpc.CallOption) (*DeleteFileResponse, error)
+	ListBlobs(ctx context.Context, in *ListBlobsRequest, opts ...grpc.CallOption) (*ListBlobsResponse, error)
+	GetBlob(ctx context.Context, in *GetBlobRequest, opts ...grpc.CallOption) (*GetBlobResponse, error)
+	WriteBlob(ctx context.Context, in *WriteBlobRequest, opts ...grpc.CallOption) (*WriteBlobResponse, error)
+	RemoveBlob(ctx context.Context, in *RemoveBlobRequest, opts ...grpc.CallOption) (*RemoveBlobResponse, error)
 }
 
 type blobServiceClient struct {
@@ -45,45 +43,36 @@ func NewBlobServiceClient(cc grpc.ClientConnInterface) BlobServiceClient {
 	return &blobServiceClient{cc}
 }
 
-func (c *blobServiceClient) ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error) {
-	out := new(ListFilesResponse)
-	err := c.cc.Invoke(ctx, BlobService_ListFiles_FullMethodName, in, out, opts...)
+func (c *blobServiceClient) ListBlobs(ctx context.Context, in *ListBlobsRequest, opts ...grpc.CallOption) (*ListBlobsResponse, error) {
+	out := new(ListBlobsResponse)
+	err := c.cc.Invoke(ctx, BlobService_ListBlobs_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *blobServiceClient) GetFile(ctx context.Context, in *GetFileRequest, opts ...grpc.CallOption) (*GetFileResponse, error) {
-	out := new(GetFileResponse)
-	err := c.cc.Invoke(ctx, BlobService_GetFile_FullMethodName, in, out, opts...)
+func (c *blobServiceClient) GetBlob(ctx context.Context, in *GetBlobRequest, opts ...grpc.CallOption) (*GetBlobResponse, error) {
+	out := new(GetBlobResponse)
+	err := c.cc.Invoke(ctx, BlobService_GetBlob_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *blobServiceClient) WriteFile(ctx context.Context, in *WriteFileRequest, opts ...grpc.CallOption) (*WriteFileResponse, error) {
-	out := new(WriteFileResponse)
-	err := c.cc.Invoke(ctx, BlobService_WriteFile_FullMethodName, in, out, opts...)
+func (c *blobServiceClient) WriteBlob(ctx context.Context, in *WriteBlobRequest, opts ...grpc.CallOption) (*WriteBlobResponse, error) {
+	out := new(WriteBlobResponse)
+	err := c.cc.Invoke(ctx, BlobService_WriteBlob_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *blobServiceClient) RenameFile(ctx context.Context, in *RenameFileRequest, opts ...grpc.CallOption) (*RenameFileResponse, error) {
-	out := new(RenameFileResponse)
-	err := c.cc.Invoke(ctx, BlobService_RenameFile_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *blobServiceClient) DeleteFile(ctx context.Context, in *DeleteFileRequest, opts ...grpc.CallOption) (*DeleteFileResponse, error) {
-	out := new(DeleteFileResponse)
-	err := c.cc.Invoke(ctx, BlobService_DeleteFile_FullMethodName, in, out, opts...)
+func (c *blobServiceClient) RemoveBlob(ctx context.Context, in *RemoveBlobRequest, opts ...grpc.CallOption) (*RemoveBlobResponse, error) {
+	out := new(RemoveBlobResponse)
+	err := c.cc.Invoke(ctx, BlobService_RemoveBlob_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +83,10 @@ func (c *blobServiceClient) DeleteFile(ctx context.Context, in *DeleteFileReques
 // All implementations must embed UnimplementedBlobServiceServer
 // for forward compatibility
 type BlobServiceServer interface {
-	ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error)
-	GetFile(context.Context, *GetFileRequest) (*GetFileResponse, error)
-	WriteFile(context.Context, *WriteFileRequest) (*WriteFileResponse, error)
-	RenameFile(context.Context, *RenameFileRequest) (*RenameFileResponse, error)
-	DeleteFile(context.Context, *DeleteFileRequest) (*DeleteFileResponse, error)
+	ListBlobs(context.Context, *ListBlobsRequest) (*ListBlobsResponse, error)
+	GetBlob(context.Context, *GetBlobRequest) (*GetBlobResponse, error)
+	WriteBlob(context.Context, *WriteBlobRequest) (*WriteBlobResponse, error)
+	RemoveBlob(context.Context, *RemoveBlobRequest) (*RemoveBlobResponse, error)
 	mustEmbedUnimplementedBlobServiceServer()
 }
 
@@ -106,20 +94,17 @@ type BlobServiceServer interface {
 type UnimplementedBlobServiceServer struct {
 }
 
-func (UnimplementedBlobServiceServer) ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListFiles not implemented")
+func (UnimplementedBlobServiceServer) ListBlobs(context.Context, *ListBlobsRequest) (*ListBlobsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBlobs not implemented")
 }
-func (UnimplementedBlobServiceServer) GetFile(context.Context, *GetFileRequest) (*GetFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFile not implemented")
+func (UnimplementedBlobServiceServer) GetBlob(context.Context, *GetBlobRequest) (*GetBlobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBlob not implemented")
 }
-func (UnimplementedBlobServiceServer) WriteFile(context.Context, *WriteFileRequest) (*WriteFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method WriteFile not implemented")
+func (UnimplementedBlobServiceServer) WriteBlob(context.Context, *WriteBlobRequest) (*WriteBlobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WriteBlob not implemented")
 }
-func (UnimplementedBlobServiceServer) RenameFile(context.Context, *RenameFileRequest) (*RenameFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RenameFile not implemented")
-}
-func (UnimplementedBlobServiceServer) DeleteFile(context.Context, *DeleteFileRequest) (*DeleteFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
+func (UnimplementedBlobServiceServer) RemoveBlob(context.Context, *RemoveBlobRequest) (*RemoveBlobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveBlob not implemented")
 }
 func (UnimplementedBlobServiceServer) mustEmbedUnimplementedBlobServiceServer() {}
 
@@ -134,92 +119,74 @@ func RegisterBlobServiceServer(s grpc.ServiceRegistrar, srv BlobServiceServer) {
 	s.RegisterService(&BlobService_ServiceDesc, srv)
 }
 
-func _BlobService_ListFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListFilesRequest)
+func _BlobService_ListBlobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBlobsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BlobServiceServer).ListFiles(ctx, in)
+		return srv.(BlobServiceServer).ListBlobs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BlobService_ListFiles_FullMethodName,
+		FullMethod: BlobService_ListBlobs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlobServiceServer).ListFiles(ctx, req.(*ListFilesRequest))
+		return srv.(BlobServiceServer).ListBlobs(ctx, req.(*ListBlobsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BlobService_GetFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetFileRequest)
+func _BlobService_GetBlob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBlobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BlobServiceServer).GetFile(ctx, in)
+		return srv.(BlobServiceServer).GetBlob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BlobService_GetFile_FullMethodName,
+		FullMethod: BlobService_GetBlob_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlobServiceServer).GetFile(ctx, req.(*GetFileRequest))
+		return srv.(BlobServiceServer).GetBlob(ctx, req.(*GetBlobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BlobService_WriteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(WriteFileRequest)
+func _BlobService_WriteBlob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WriteBlobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BlobServiceServer).WriteFile(ctx, in)
+		return srv.(BlobServiceServer).WriteBlob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BlobService_WriteFile_FullMethodName,
+		FullMethod: BlobService_WriteBlob_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlobServiceServer).WriteFile(ctx, req.(*WriteFileRequest))
+		return srv.(BlobServiceServer).WriteBlob(ctx, req.(*WriteBlobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BlobService_RenameFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RenameFileRequest)
+func _BlobService_RemoveBlob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveBlobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BlobServiceServer).RenameFile(ctx, in)
+		return srv.(BlobServiceServer).RemoveBlob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BlobService_RenameFile_FullMethodName,
+		FullMethod: BlobService_RemoveBlob_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlobServiceServer).RenameFile(ctx, req.(*RenameFileRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BlobService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteFileRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BlobServiceServer).DeleteFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BlobService_DeleteFile_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlobServiceServer).DeleteFile(ctx, req.(*DeleteFileRequest))
+		return srv.(BlobServiceServer).RemoveBlob(ctx, req.(*RemoveBlobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -232,24 +199,20 @@ var BlobService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*BlobServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListFiles",
-			Handler:    _BlobService_ListFiles_Handler,
+			MethodName: "ListBlobs",
+			Handler:    _BlobService_ListBlobs_Handler,
 		},
 		{
-			MethodName: "GetFile",
-			Handler:    _BlobService_GetFile_Handler,
+			MethodName: "GetBlob",
+			Handler:    _BlobService_GetBlob_Handler,
 		},
 		{
-			MethodName: "WriteFile",
-			Handler:    _BlobService_WriteFile_Handler,
+			MethodName: "WriteBlob",
+			Handler:    _BlobService_WriteBlob_Handler,
 		},
 		{
-			MethodName: "RenameFile",
-			Handler:    _BlobService_RenameFile_Handler,
-		},
-		{
-			MethodName: "DeleteFile",
-			Handler:    _BlobService_DeleteFile_Handler,
+			MethodName: "RemoveBlob",
+			Handler:    _BlobService_RemoveBlob_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

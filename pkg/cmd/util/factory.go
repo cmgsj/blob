@@ -29,9 +29,10 @@ func (f *factory) HealthClient() healthv1.HealthClient {
 }
 
 func NewFactory(ctx context.Context, address string) (Factory, error) {
+	logger := interceptors.NewLogger()
 	opts := []grpc.DialOption{
-		grpc.WithUnaryInterceptor(interceptors.ClientUnaryLogger),
-		grpc.WithStreamInterceptor(interceptors.ClientStreamLogger),
+		grpc.WithUnaryInterceptor(logger.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(logger.StreamClientInterceptor()),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 	conn, err := grpc.DialContext(ctx, address, opts...)

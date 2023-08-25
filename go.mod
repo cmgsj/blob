@@ -4,9 +4,10 @@ go 1.21.0
 
 require (
 	github.com/bufbuild/buf v1.26.1
+	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.5
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2
 	github.com/grpc-ecosystem/grpc-health-probe v0.4.19
-	github.com/spf13/afero v1.9.5
 	github.com/spf13/cobra v1.7.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20230815205213-6bfd019c3878
 	google.golang.org/grpc v1.57.0
