@@ -15,8 +15,6 @@ plugins:
       # - logtostderr=true
   - name: openapiv2
     out: pkg/gen
-  - name: openapiv2
-    out: pkg/openapi/docs/schemas
     # opt:
     # - generate_unbound_methods=true
     # - logtostderr=true

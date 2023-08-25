@@ -1,6 +1,8 @@
 package health
 
 import (
+	"fmt"
+
 	"github.com/cmgsj/blob/pkg/blob"
 	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
 	"github.com/spf13/cobra"
@@ -50,10 +52,6 @@ func (o *HealthOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	v := map[string]string{
-		"service": o.Request.GetService(),
-		"status":  healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())],
-	}
-	err = cmdutil.PrintJSON(o.IOStreams.Out, v)
-	return err
+	fmt.Fprintf(o.IOStreams.Out, "%s: %s\n", o.Request.GetService(), healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())])
+	return nil
 }

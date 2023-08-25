@@ -1,6 +1,6 @@
 include .bingo/Variables.mk
 
-SHELL=/bin/bash
+SHELL=/usr/bin/env bash
 
 PROVIDER_MODULES ?= $(shell find $(PWD)/providers/  -name "go.mod" | grep -v ".bingo" | xargs dirname)
 MODULES          ?= $(PROVIDER_MODULES) $(PWD)/ $(PWD)/examples
@@ -107,7 +107,7 @@ lint: $(BUF) $(COPYRIGHT) fmt docs
 lint_module: ## Runs various static analysis against our code.
 lint_module: $(FAILLINT) $(GOLANGCI_LINT) $(MISSPELL)
 	@echo ">> verifying modules being imported"
-	@cd $(DIR) && $(FAILLINT) -paths "errors=github.com/pkg/errors,fmt.{Print,Printf,Println},github.com/golang/protobuf=google.golang.org/protobuf" ./...
+	@cd $(DIR) && $(FAILLINT) -paths "fmt.{Print,Printf,Println},github.com/golang/protobuf=google.golang.org/protobuf" ./...
 	
 	@echo ">> examining all of the Go files"
 	@cd $(DIR) && go vet -stdmethods=false ./...
@@ -134,3 +134,9 @@ proto: $(BUF) $(PROTOC_GEN_GO) $(PROTOC_GEN_GO_GRPC) $(PROTO_TEST_DIR)/test.prot
 		--go_out=$(PROTO_TEST_DIR)/../ \
 		--go-grpc_out=$(PROTO_TEST_DIR)/../ \
 	    $(PROTO_TEST_DIR)/*.proto
+
+.PHONY: buf.gen
+buf.gen:
+	@$(BUF) generate \
+           --template ./testing/testvalidate/testvalidate.buf.gen.yaml \
+           --path ./testing/testvalidate/v1

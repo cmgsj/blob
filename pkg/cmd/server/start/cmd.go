@@ -6,14 +6,13 @@ import (
 	"net"
 	"net/http"
 
-	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
-	"github.com/cmgsj/blob/pkg/interceptors"
-	"github.com/spf13/cobra"
-
 	"github.com/cmgsj/blob/pkg/blob"
+	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
-	"github.com/cmgsj/blob/pkg/openapi"
+	"github.com/cmgsj/blob/pkg/interceptors"
+	"github.com/cmgsj/go-lib/openapi"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
@@ -90,7 +89,7 @@ func (o *StartOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", rmux)
-	mux.Handle("/docs/", http.FileServer(http.FS(openapi.Docs())))
+	mux.Handle("/docs/", openapi.ServeDocs())
 
 	errch := make(chan error)
 
