@@ -206,7 +206,7 @@ github.com/bufbuild/protocompile/protoutil
 github.com/bufbuild/protocompile/reporter
 github.com/bufbuild/protocompile/sourceinfo
 github.com/bufbuild/protocompile/walk
-# github.com/cmgsj/go-lib v0.0.4
+# github.com/cmgsj/go-lib v0.0.5
 ## explicit; go 1.21.0
 github.com/cmgsj/go-lib/openapi
 # github.com/containerd/stargz-snapshotter/estargz v0.14.3

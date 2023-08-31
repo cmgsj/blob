@@ -6,15 +6,11 @@ import (
 	"github.com/cmgsj/go-lib/openapi"
 )
 
-func init() {
-	openapi.Must(openapi.RegisterSchema(schema))
-}
-
 var (
 	//go:embed blob.swagger.json
 	docs []byte
 
-	schema = openapi.Schema{
+	OpenapiSchema = openapi.Schema{
 		Name:        ServiceName,
 		ContentJSON: docs,
 	}

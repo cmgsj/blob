@@ -7,6 +7,7 @@ plugins:
     out: pkg/gen
     opt:
       - paths=source_relative
+      - require_unimplemented_servers=true
   - name: grpc-gateway
     out: pkg/gen
     opt:

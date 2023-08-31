@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/bufbuild/buf v1.26.1
-	github.com/cmgsj/go-lib v0.0.4
+	github.com/cmgsj/go-lib v0.0.5
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.0

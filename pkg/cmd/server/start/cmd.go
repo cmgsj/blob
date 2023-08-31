@@ -89,7 +89,7 @@ func (o *StartOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", rmux)
-	mux.Handle("/docs/", openapi.ServeDocs())
+	mux.Handle("/docs/", openapi.ServeDocs("/docs/", blob.OpenapiSchema))
 
 	errch := make(chan error)
 
