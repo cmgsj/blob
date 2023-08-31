@@ -1,4 +1,4 @@
-package blob
+package docs
 
 import (
 	_ "embed"
@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	//go:embed blob.swagger.json
+	//go:embed openapi.swagger.json
 	docs []byte
 
 	OpenapiSchema = openapi.Schema{
-		Name:        ServiceName,
+		Name:        "openapi",
 		ContentJSON: docs,
 	}
 )

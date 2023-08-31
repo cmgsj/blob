@@ -8,6 +8,7 @@ import (
 
 	"github.com/cmgsj/blob/pkg/blob"
 	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
+	"github.com/cmgsj/blob/pkg/docs"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/cmgsj/blob/pkg/interceptors"
 	"github.com/cmgsj/go-lib/openapi"
@@ -89,7 +90,7 @@ func (o *StartOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", rmux)
-	mux.Handle("/docs/", openapi.ServeDocs("/docs/", blob.OpenapiSchema))
+	mux.Handle("/docs/", openapi.ServeDocs("/docs/", docs.OpenapiSchema))
 
 	errch := make(chan error)
 

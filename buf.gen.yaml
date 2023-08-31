@@ -12,12 +12,11 @@ plugins:
     out: pkg/gen
     opt:
       - paths=source_relative
-      # - generate_unbound_methods=true
-      # - logtostderr=true
+      - generate_unbound_methods=false
   - name: openapiv2
     out: pkg/gen
-    # opt:
-    # - generate_unbound_methods=true
-    # - logtostderr=true
-    # - allow_merge=true
-    # strategy: all
+    opt:
+      - generate_unbound_methods=false
+      - allow_merge=true
+      - merge_file_name=openapi
+    strategy: all

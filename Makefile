@@ -6,4 +6,4 @@ build: gen
 
 gen:
 	buf format -w && buf generate --exclude-path vendor
-	cp pkg/gen/proto/blob/v1/blob.swagger.json pkg/blob
+	cp pkg/gen/openapi.swagger.json pkg/docs
