@@ -65,7 +65,7 @@ func (c *reporter) PostMsgSend(payload any, err error, duration time.Duration) {
 				c.ctx,
 				LevelError,
 				"payload is not a google.golang.org/protobuf/proto.Message; programmatic error?",
-				fields.AppendUnique(Fields{"grpc.request.type", fmt.Sprintf("%T", payload)}),
+				fields.AppendUnique(Fields{"grpc.request.type", fmt.Sprintf("%T", payload)})...,
 			)
 			return
 		}
@@ -79,7 +79,7 @@ func (c *reporter) PostMsgSend(payload any, err error, duration time.Duration) {
 				c.ctx,
 				LevelError,
 				"payload is not a google.golang.org/protobuf/proto.Message; programmatic error?",
-				fields.AppendUnique(Fields{"grpc.response.type", fmt.Sprintf("%T", payload)}),
+				fields.AppendUnique(Fields{"grpc.response.type", fmt.Sprintf("%T", payload)})...,
 			)
 			return
 		}
@@ -110,7 +110,7 @@ func (c *reporter) PostMsgReceive(payload any, err error, duration time.Duration
 				c.ctx,
 				LevelError,
 				"payload is not a google.golang.org/protobuf/proto.Message; programmatic error?",
-				fields.AppendUnique(Fields{"grpc.request.type", fmt.Sprintf("%T", payload)}),
+				fields.AppendUnique(Fields{"grpc.request.type", fmt.Sprintf("%T", payload)})...,
 			)
 			return
 		}
@@ -124,7 +124,7 @@ func (c *reporter) PostMsgReceive(payload any, err error, duration time.Duration
 				c.ctx,
 				LevelError,
 				"payload is not a google.golang.org/protobuf/proto.Message; programmatic error?",
-				fields.AppendUnique(Fields{"grpc.response.type", fmt.Sprintf("%T", payload)}),
+				fields.AppendUnique(Fields{"grpc.response.type", fmt.Sprintf("%T", payload)})...,
 			)
 			return
 		}
@@ -142,15 +142,20 @@ func reportable(logger Logger, opts *options) interceptors.CommonReportableFunc 
 		}
 
 		// Field dups from context override the common fields.
-		fields := newCommonFields(kind, c).WithUnique(ExtractFields(ctx))
+		fields := newCommonFields(kind, c)
+		if opts.disableGrpcLogFields != nil {
+			fields = disableCommonLoggingFields(kind, c, opts.disableGrpcLogFields)
+		}
+		fields = fields.WithUnique(ExtractFields(ctx))
+
 		if !c.IsClient {
 			if peer, ok := peer.FromContext(ctx); ok {
 				fields = append(fields, "peer.address", peer.Addr.String())
 			}
 		}
-		if opts.fieldsFromCtxFn != nil {
+		if opts.fieldsFromCtxCallMetaFn != nil {
 			// fieldsFromCtxFn dups override the existing fields.
-			fields = opts.fieldsFromCtxFn(ctx).AppendUnique(fields)
+			fields = opts.fieldsFromCtxCallMetaFn(ctx, c).AppendUnique(fields)
 		}
 
 		singleUseFields := Fields{"grpc.start_time", time.Now().Format(opts.timestampFormat)}

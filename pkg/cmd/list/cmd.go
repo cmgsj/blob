@@ -1,61 +1,60 @@
 package list
 
 import (
-	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
+	"context"
+
+	"github.com/cmgsj/blob/pkg/cli"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/spf13/cobra"
 )
 
-type ListOptions struct {
-	IOStreams cmdutil.IOStreams
-	Request   *blobv1.ListBlobsRequest
+func NewCmdList(f cli.Factory) *cobra.Command {
+	o := NewListOptions(f)
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "list blobs",
+		Args:  cobra.MaximumNArgs(1),
+		Run:   cli.Run(o),
+	}
+	return cmd
 }
 
-func NewListOptions(streams cmdutil.IOStreams) *ListOptions {
+type ListOptions struct {
+	cli.Factory
+	Request *blobv1.ListBlobsRequest
+}
+
+func NewListOptions(f cli.Factory) *ListOptions {
 	return &ListOptions{
-		IOStreams: streams,
+		Factory: f,
 		Request: &blobv1.ListBlobsRequest{
 			Path: "/",
 		},
 	}
 }
 
-func NewCmdList(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
-	o := NewListOptions(streams)
-	cmd := &cobra.Command{
-		Use:     "list",
-		Aliases: []string{"ls"},
-		Short:   "list blobs",
-		Args:    cobra.MaximumNArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			stderr := o.IOStreams.Err
-			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
-			cmdutil.CheckErr(o.Validate(), stderr)
-			cmdutil.CheckErr(o.Run(f, cmd), stderr)
-		},
-	}
-	return cmd
-}
-
-func (o *ListOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+func (o *ListOptions) Complete(ctx context.Context, cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
 		o.Request.Path = args[0]
 	}
 	return nil
 }
 
-func (o *ListOptions) Validate() error {
+func (o *ListOptions) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (o *ListOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	resp, err := f.BlobServiceClient().ListBlobs(cmd.Context(), o.Request)
+func (o *ListOptions) Run(ctx context.Context) error {
+	client, err := o.BlobServiceClient(ctx)
+	if err != nil {
+		return err
+	}
+	resp, err := client.ListBlobs(ctx, o.Request)
 	if err != nil {
 		return err
 	}
 	if resp.GetCount() == 0 {
 		return nil
 	}
-	err = cmdutil.PrintJSON(o.IOStreams.Out, resp)
-	return err
+	return cli.JSON(resp)
 }

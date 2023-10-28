@@ -1,59 +1,54 @@
 package write
 
 import (
+	"context"
 	"io"
 	"os"
 
-	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
+	"github.com/cmgsj/blob/pkg/cli"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/spf13/cobra"
 )
 
-type WriteOptions struct {
-	IOStreams cmdutil.IOStreams
-	Request   *blobv1.WriteBlobRequest
-	File      string
-}
-
-func NewWriteOptions(streams cmdutil.IOStreams) *WriteOptions {
-	return &WriteOptions{
-		IOStreams: streams,
-		Request:   &blobv1.WriteBlobRequest{},
-	}
-}
-
-func NewCmdWrite(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
-	o := NewWriteOptions(streams)
+func NewCmdWrite(f cli.Factory) *cobra.Command {
+	o := NewWriteOptions(f)
 	cmd := &cobra.Command{
-		Use:     "write",
-		Aliases: []string{"w"},
-		Short:   "write blob",
-		Args:    cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			stderr := o.IOStreams.Err
-			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
-			cmdutil.CheckErr(o.Validate(), stderr)
-			cmdutil.CheckErr(o.Run(f, cmd), stderr)
-		},
+		Use:   "write",
+		Short: "write blob",
+		Args:  cobra.ExactArgs(1),
+		Run:   cli.Run(o),
 	}
 	cmd.Flags().StringVarP(&o.File, "file", "f", o.File, "input file")
 	return cmd
 }
 
-func (o *WriteOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+type WriteOptions struct {
+	cli.Factory
+	Request *blobv1.WriteBlobRequest
+	File    string
+}
+
+func NewWriteOptions(f cli.Factory) *WriteOptions {
+	return &WriteOptions{
+		Factory: f,
+		Request: &blobv1.WriteBlobRequest{},
+	}
+}
+
+func (o *WriteOptions) Complete(ctx context.Context, cmd *cobra.Command, args []string) error {
 	o.Request.BlobName = args[0]
 	return nil
 }
 
-func (o *WriteOptions) Validate() error {
+func (o *WriteOptions) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (o *WriteOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
+func (o *WriteOptions) Run(ctx context.Context) error {
 	var content []byte
 	var err error
 	if o.File == "" {
-		content, err = io.ReadAll(o.IOStreams.In)
+		content, err = io.ReadAll(os.Stdin)
 	} else {
 		content, err = os.ReadFile(o.File)
 	}
@@ -61,6 +56,10 @@ func (o *WriteOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 		return err
 	}
 	o.Request.Content = content
-	_, err = f.BlobServiceClient().WriteBlob(cmd.Context(), o.Request)
+	client, err := o.BlobServiceClient(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = client.WriteBlob(ctx, o.Request)
 	return err
 }

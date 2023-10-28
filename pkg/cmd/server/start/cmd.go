@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/cmgsj/blob/pkg/blob"
-	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
+	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/docs"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/cmgsj/blob/pkg/interceptors"
@@ -20,35 +20,30 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type StartOptions struct {
-	IOStreams cmdutil.IOStreams
-	HttpAddr  string
-	GrpcAddr  string
-}
-
-func NewStartOptions(streams cmdutil.IOStreams) *StartOptions {
-	return &StartOptions{
-		IOStreams: streams,
-	}
-}
-
-func NewCmdStart(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
-	o := NewStartOptions(streams)
+func NewCmdStart(f cli.Factory) *cobra.Command {
+	o := NewStartOptions(f)
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "start blob server",
 		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			stderr := o.IOStreams.Err
-			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
-			cmdutil.CheckErr(o.Validate(), stderr)
-			cmdutil.CheckErr(o.Run(f, cmd), stderr)
-		},
+		Run:   cli.Run(o),
 	}
 	return cmd
 }
 
-func (o *StartOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+type StartOptions struct {
+	cli.Factory
+	HttpAddr string
+	GrpcAddr string
+}
+
+func NewStartOptions(f cli.Factory) *StartOptions {
+	return &StartOptions{
+		Factory: f,
+	}
+}
+
+func (o *StartOptions) Complete(ctx context.Context, cmd *cobra.Command, args []string) error {
 	var err error
 	o.HttpAddr, err = cmd.Flags().GetString("http-address")
 	if err != nil {
@@ -61,11 +56,11 @@ func (o *StartOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []st
 	return nil
 }
 
-func (o *StartOptions) Validate() error {
+func (o *StartOptions) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (o *StartOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
+func (o *StartOptions) Run(ctx context.Context) error {
 	logger := interceptors.NewLogger()
 
 	grpcServer := grpc.NewServer(
@@ -82,8 +77,11 @@ func (o *StartOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 	healthServer.SetServingStatus(blob.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
 	rmux := runtime.NewServeMux()
-	ctx := context.Background()
-	err := blobv1.RegisterBlobServiceHandlerClient(ctx, rmux, f.BlobServiceClient())
+	client, err := o.BlobServiceClient(ctx)
+	if err != nil {
+		return err
+	}
+	err = blobv1.RegisterBlobServiceHandlerClient(ctx, rmux, client)
 	if err != nil {
 		return err
 	}
@@ -123,5 +121,4 @@ func (o *StartOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
 	}
 
 	return nil
-
 }

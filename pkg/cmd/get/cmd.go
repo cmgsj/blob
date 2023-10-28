@@ -1,54 +1,54 @@
 package get
 
 import (
-	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
+	"context"
+
+	"github.com/cmgsj/blob/pkg/cli"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/spf13/cobra"
 )
 
-type GetOptions struct {
-	IOStreams cmdutil.IOStreams
-	Request   *blobv1.GetBlobRequest
-}
-
-func NewGetOptions(streams cmdutil.IOStreams) *GetOptions {
-	return &GetOptions{
-		IOStreams: streams,
-		Request:   &blobv1.GetBlobRequest{},
-	}
-}
-
-func NewCmdGet(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
-	o := NewGetOptions(streams)
+func NewCmdGet(f cli.Factory) *cobra.Command {
+	o := NewGetOptions(f)
 	cmd := &cobra.Command{
-		Use:     "get",
-		Aliases: []string{"g"},
-		Short:   "get blob",
-		Args:    cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			stderr := o.IOStreams.Err
-			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
-			cmdutil.CheckErr(o.Validate(), stderr)
-			cmdutil.CheckErr(o.Run(f, cmd), stderr)
-		},
+		Use:   "get",
+		Short: "get blob",
+		Args:  cobra.ExactArgs(1),
+		Run:   cli.Run(o),
 	}
 	return cmd
 }
 
-func (o *GetOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+type GetOptions struct {
+	cli.Factory
+	Request *blobv1.GetBlobRequest
+}
+
+func NewGetOptions(f cli.Factory) *GetOptions {
+	return &GetOptions{
+		Factory: f,
+		Request: &blobv1.GetBlobRequest{},
+	}
+}
+
+func (o *GetOptions) Complete(ctx context.Context, cmd *cobra.Command, args []string) error {
 	o.Request.BlobName = args[0]
 	return nil
 }
 
-func (o *GetOptions) Validate() error {
+func (o *GetOptions) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (o *GetOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	resp, err := f.BlobServiceClient().GetBlob(cmd.Context(), o.Request)
+func (o *GetOptions) Run(ctx context.Context) error {
+	client, err := o.BlobServiceClient(ctx)
 	if err != nil {
 		return err
 	}
-	err = cmdutil.PrintJSON(o.IOStreams.Out, resp)
-	return err
+	resp, err := client.GetBlob(ctx, o.Request)
+	if err != nil {
+		return err
+	}
+	resp.Blob.Content = nil
+	return cli.JSON(resp)
 }

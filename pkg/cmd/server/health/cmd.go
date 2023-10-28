@@ -1,57 +1,59 @@
 package health
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/cmgsj/blob/pkg/blob"
-	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
+	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/spf13/cobra"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-type HealthOptions struct {
-	IOStreams cmdutil.IOStreams
-	Request   *healthv1.HealthCheckRequest
+func NewCmdHealth(f cli.Factory) *cobra.Command {
+	o := NewWriteOptions(f)
+	cmd := &cobra.Command{
+		Use:   "health",
+		Short: "health-check blob server",
+		Args:  cobra.NoArgs,
+		Run:   cli.Run(o),
+	}
+	return cmd
 }
 
-func NewWriteOptions(streams cmdutil.IOStreams) *HealthOptions {
+type HealthOptions struct {
+	cli.Factory
+	Request *healthv1.HealthCheckRequest
+}
+
+func NewWriteOptions(f cli.Factory) *HealthOptions {
 	return &HealthOptions{
-		IOStreams: streams,
+		Factory: f,
 		Request: &healthv1.HealthCheckRequest{
 			Service: blob.ServiceName,
 		},
 	}
 }
 
-func NewCmdHealth(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
-	o := NewWriteOptions(streams)
-	cmd := &cobra.Command{
-		Use:   "health",
-		Short: "health-check blob server",
-		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			stderr := o.IOStreams.Err
-			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
-			cmdutil.CheckErr(o.Validate(), stderr)
-			cmdutil.CheckErr(o.Run(f, cmd), stderr)
-		},
-	}
-	return cmd
-}
-
-func (o *HealthOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+func (o *HealthOptions) Complete(ctx context.Context, cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *HealthOptions) Validate() error {
+func (o *HealthOptions) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (o *HealthOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	resp, err := f.HealthClient().Check(cmd.Context(), o.Request)
+func (o *HealthOptions) Run(ctx context.Context) error {
+	client, err := o.HealthClient(ctx)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(o.IOStreams.Out, "%s: %s\n", o.Request.GetService(), healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())])
+	resp, err := client.Check(ctx, o.Request)
+	if err != nil {
+		return err
+	}
+	service := o.Request.GetService()
+	status := healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())]
+	fmt.Printf("%s: %s\n", service, status)
 	return nil
 }

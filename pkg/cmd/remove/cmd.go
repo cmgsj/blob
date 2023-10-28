@@ -1,50 +1,50 @@
 package remove
 
 import (
-	cmdutil "github.com/cmgsj/blob/pkg/cmd/util"
+	"context"
+
+	"github.com/cmgsj/blob/pkg/cli"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/spf13/cobra"
 )
 
-type RemoveOptions struct {
-	IOStreams cmdutil.IOStreams
-	Request   *blobv1.RemoveBlobRequest
-}
-
-func NewRemoveOptions(streams cmdutil.IOStreams) *RemoveOptions {
-	return &RemoveOptions{
-		IOStreams: streams,
-		Request:   &blobv1.RemoveBlobRequest{},
-	}
-}
-
-func NewCmdRemove(f cmdutil.Factory, streams cmdutil.IOStreams) *cobra.Command {
-	o := NewRemoveOptions(streams)
+func NewCmdRemove(f cli.Factory) *cobra.Command {
+	o := NewRemoveOptions(f)
 	cmd := &cobra.Command{
-		Use:     "remove",
-		Aliases: []string{"rm"},
-		Short:   "remove blob",
-		Args:    cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			stderr := o.IOStreams.Err
-			cmdutil.CheckErr(o.Complete(f, cmd, args), stderr)
-			cmdutil.CheckErr(o.Validate(), stderr)
-			cmdutil.CheckErr(o.Run(f, cmd), stderr)
-		},
+		Use:   "remove",
+		Short: "remove blob",
+		Args:  cobra.ExactArgs(1),
+		Run:   cli.Run(o),
 	}
 	return cmd
 }
 
-func (o *RemoveOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+type RemoveOptions struct {
+	cli.Factory
+	Request *blobv1.RemoveBlobRequest
+}
+
+func NewRemoveOptions(f cli.Factory) *RemoveOptions {
+	return &RemoveOptions{
+		Factory: f,
+		Request: &blobv1.RemoveBlobRequest{},
+	}
+}
+
+func (o *RemoveOptions) Complete(ctx context.Context, cmd *cobra.Command, args []string) error {
 	o.Request.BlobName = args[0]
 	return nil
 }
 
-func (o *RemoveOptions) Validate() error {
+func (o *RemoveOptions) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (o *RemoveOptions) Run(f cmdutil.Factory, cmd *cobra.Command) error {
-	_, err := f.BlobServiceClient().RemoveBlob(cmd.Context(), o.Request)
+func (o *RemoveOptions) Run(ctx context.Context) error {
+	client, err := o.BlobServiceClient(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = client.RemoveBlob(ctx, o.Request)
 	return err
 }
