@@ -50,6 +50,6 @@ func (o *ReadOptions) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Printf("%s\n", resp.GetBlob().GetContent())
-	return err
+	fmt.Printf("%s", resp.GetBlob().GetContent())
+	return nil
 }
