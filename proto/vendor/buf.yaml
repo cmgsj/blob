@@ -1,5 +1,5 @@
 version: v1
-name: buf.build/cmgsj/proto
+name: buf.build/cmgsj/vendor
 breaking:
   use:
     - FILE

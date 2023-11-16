@@ -70,7 +70,7 @@ func (o *StartOptions) Run(ctx context.Context) error {
 	healthServer := health.NewServer()
 	blobServer := blob.NewServer()
 
-	reflection.RegisterV1(grpcServer)
+	reflection.Register(grpcServer)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 	blobv1.RegisterBlobServiceServer(grpcServer, blobServer)
 

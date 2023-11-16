@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package blob.v1;
 
-import "proto/google/api/annotations.proto";
-import "proto/protoc-gen-openapiv2/options/annotations.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
-option go_package = "github.com/cmgsj/blob/pkg/gen/proto/blob/v1;blobv1";
+option go_package = "blobv1";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "Blob Service API";

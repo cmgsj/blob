@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: proto/blob/v1/blob.proto
+// source: blob/v1/blob.proto
 
 package blobv1
 
@@ -216,5 +216,5 @@ var BlobService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/blob/v1/blob.proto",
+	Metadata: "blob/v1/blob.proto",
 }
