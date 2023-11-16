@@ -88,7 +88,7 @@ func (o *StartOptions) Run(ctx context.Context) error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", rmux)
-	mux.Handle("/docs/", openapi.ServeDocs("/docs/", docs.OpenapiSchema))
+	mux.Handle("/docs/", openapi.ServeDocs("/docs/", docs.OpenapiSchema()))
 
 	errch := make(chan error)
 
