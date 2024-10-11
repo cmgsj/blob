@@ -9,7 +9,8 @@ import (
 )
 
 func NewLogger() FullInterceptor {
-	log := SlogAdapter(slog.Default())
+	logger := SlogAdapter(slog.Default())
+
 	opts := []logging.Option{
 		logging.WithCodes(logging.DefaultErrorToCode),
 		logging.WithDurationField(logging.DefaultDurationToFields),
@@ -17,11 +18,16 @@ func NewLogger() FullInterceptor {
 		logging.WithTimestampFormat(time.RFC3339),
 		logging.WithFieldsFromContext(logging.ExtractFields),
 	}
-	return interceptor{
-		us: logging.UnaryServerInterceptor(log, opts...),
-		ss: logging.StreamServerInterceptor(log, opts...),
-		uc: logging.UnaryClientInterceptor(log, opts...),
-		sc: logging.StreamClientInterceptor(log, opts...),
+
+	return FullInterceptor{
+		clientInterceptor: clientInterceptor{
+			unary:  logging.UnaryClientInterceptor(logger, opts...),
+			stream: logging.StreamClientInterceptor(logger, opts...),
+		},
+		serverInterceptor: serverInterceptor{
+			unary:  logging.UnaryServerInterceptor(logger, opts...),
+			stream: logging.StreamServerInterceptor(logger, opts...),
+		},
 	}
 }
 

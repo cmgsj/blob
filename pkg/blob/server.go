@@ -6,9 +6,7 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-var (
-	ServiceName = blobv1.BlobService_ServiceDesc.ServiceName
-)
+var ServiceName = blobv1.BlobService_ServiceDesc.ServiceName
 
 type Server struct {
 	blobv1.UnimplementedBlobServiceServer

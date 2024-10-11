@@ -11,7 +11,7 @@ import (
 	"github.com/cmgsj/blob/pkg/docs"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/cmgsj/blob/pkg/interceptors"
-	"github.com/cmgsj/go-lib/openapi"
+	"github.com/cmgsj/go-lib/swagger"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -88,7 +88,7 @@ func (o *StartOptions) Run(ctx context.Context) error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", rmux)
-	mux.Handle("/docs/", openapi.ServeDocs("/docs/", docs.OpenapiSchema()))
+	mux.Handle("/docs/", swagger.Docs("/docs/", docs.SwaggerSchema()))
 
 	errch := make(chan error)
 

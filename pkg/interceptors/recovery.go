@@ -7,13 +7,16 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 )
 
-func NewRecoverer() ServerInterceptor {
+func NewRecovery() ServerInterceptor {
 	opts := []recovery.Option{
 		recovery.WithRecoveryHandlerContext(recoveryHandler),
 	}
-	return interceptor{
-		us: recovery.UnaryServerInterceptor(opts...),
-		ss: recovery.StreamServerInterceptor(opts...),
+
+	return ServerInterceptor{
+		serverInterceptor: serverInterceptor{
+			unary:  recovery.UnaryServerInterceptor(opts...),
+			stream: recovery.StreamServerInterceptor(opts...),
+		},
 	}
 }
 
