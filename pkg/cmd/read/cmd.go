@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/cmgsj/blob/pkg/cli"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
-	"github.com/spf13/cobra"
 )
 
 func NewCmdRead(f cli.Factory) *cobra.Command {

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/cmd/get"
 	"github.com/cmgsj/blob/pkg/cmd/list"
@@ -8,9 +10,9 @@ import (
 	"github.com/cmgsj/blob/pkg/cmd/remove"
 	"github.com/cmgsj/blob/pkg/cmd/server"
 	"github.com/cmgsj/blob/pkg/cmd/write"
-	"github.com/cmgsj/blob/pkg/version"
-	"github.com/spf13/cobra"
 )
+
+var version = "dev"
 
 func NewCmdBlob() *cobra.Command {
 	o := NewBlobOptions()
@@ -18,7 +20,7 @@ func NewCmdBlob() *cobra.Command {
 		Use:     "blob",
 		Short:   "blob CLI",
 		Run:     cli.Help,
-		Version: version.Version,
+		Version: version,
 	}
 	f := cli.NewFactory(o)
 	cmd.AddCommand(get.NewCmdGet(f))

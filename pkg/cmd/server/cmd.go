@@ -1,10 +1,11 @@
 package server
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/cmd/server/health"
 	"github.com/cmgsj/blob/pkg/cmd/server/start"
-	"github.com/spf13/cobra"
 )
 
 func NewCmdServer(f cli.Factory) *cobra.Command {

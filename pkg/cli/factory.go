@@ -3,11 +3,12 @@ package cli
 import (
 	"context"
 
-	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
-	"github.com/cmgsj/blob/pkg/interceptors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
+
+	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
+	"github.com/cmgsj/blob/pkg/interceptors"
 )
 
 type Factory interface {

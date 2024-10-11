@@ -3,8 +3,9 @@ package docs
 import (
 	_ "embed"
 
-	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/cmgsj/go-lib/swagger"
+
+	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
 //go:embed docs.swagger.json
