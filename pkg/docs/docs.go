@@ -7,7 +7,7 @@ import (
 	"github.com/cmgsj/go-lib/swagger"
 )
 
-//go:embed openapi.swagger.json
+//go:embed docs.swagger.json
 var swaggerDocs []byte
 
 func SwaggerSchema() swagger.Schema {

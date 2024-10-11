@@ -8,24 +8,24 @@ import "protoc-gen-openapiv2/options/annotations.proto";
 option go_package = "blobv1";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
-    title: "Blob Service API";
-    version: "1.0";
-  };
-  schemes: HTTP;
-  schemes: HTTPS;
-  consumes: "application/json";
-  produces: "application/json";
+    title: "Blob Service API"
+    version: "1.0"
+  }
+  schemes: HTTP
+  schemes: HTTPS
+  consumes: "application/json"
+  produces: "application/json"
   tags: {
-    name: "v1.blob";
-    description: "Blob Service API";
+    name: "v1.blob"
+    description: "Blob Service API"
   }
   security_definitions: {
     security: {
-      key: "APIKeyAuth";
+      key: "APIKeyAuth"
       value: {
-        type: TYPE_API_KEY;
-        in: IN_HEADER;
-        name: "X-API-Key";
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "X-API-Key"
       }
     }
   }
@@ -38,9 +38,9 @@ service BlobService {
   rpc ListBlobs(ListBlobsRequest) returns (ListBlobsResponse) {
     option (google.api.http) = {get: "/api/v1/blob"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "List blobs";
-      operation_id: "list-blobs";
-      tags: "v1.blob";
+      summary: "List blobs"
+      operation_id: "list-blobs"
+      tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
@@ -49,9 +49,9 @@ service BlobService {
   rpc GetBlob(GetBlobRequest) returns (GetBlobResponse) {
     option (google.api.http) = {get: "/api/v1/blob/{blob_name}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Get blob";
-      operation_id: "get-blob";
-      tags: "v1.blob";
+      summary: "Get blob"
+      operation_id: "get-blob"
+      tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
@@ -63,9 +63,9 @@ service BlobService {
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Write blob";
-      operation_id: "write-blob";
-      tags: "v1.blob";
+      summary: "Write blob"
+      operation_id: "write-blob"
+      tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
@@ -74,9 +74,9 @@ service BlobService {
   rpc RemoveBlob(RemoveBlobRequest) returns (RemoveBlobResponse) {
     option (google.api.http) = {delete: "/api/v1/blob/{blob_name}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Remove blob";
-      operation_id: "remove-blob";
-      tags: "v1.blob";
+      summary: "Remove blob"
+      operation_id: "remove-blob"
+      tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }

@@ -5,4 +5,4 @@ build: gen
 	go build -ldflags "-X github.com/cmgsj/blob/pkg/version.Version=1.0.0" .
 
 gen:
-	buf format -w && buf generate
+	buf format -w && buf generate --template proto/buf.gen.yaml proto
