@@ -20,6 +20,6 @@ func NewRecovery() ServerInterceptor {
 	}
 }
 
-func recoveryHandler(ctx context.Context, p any) (err error) {
+func recoveryHandler(ctx context.Context, p any) error {
 	return fmt.Errorf("%v", p)
 }

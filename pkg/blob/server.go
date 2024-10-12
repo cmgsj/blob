@@ -24,6 +24,7 @@ func (s *Server) ListBlobs(ctx context.Context, req *blobv1.ListBlobsRequest) (*
 	if err != nil {
 		return nil, err
 	}
+
 	return &blobv1.ListBlobsResponse{BlobNames: blobs, Count: uint64(len(blobs))}, nil
 }
 
@@ -32,15 +33,18 @@ func (s *Server) GetBlob(ctx context.Context, req *blobv1.GetBlobRequest) (*blob
 	if err != nil {
 		return nil, err
 	}
+
 	return &blobv1.GetBlobResponse{Blob: blob}, nil
 }
 
 func (s *Server) WriteBlob(ctx context.Context, req *blobv1.WriteBlobRequest) (*blobv1.WriteBlobResponse, error) {
 	err := s.storage.WriteBlob(ctx, req.GetBlobName(), req.GetContent())
+
 	return &blobv1.WriteBlobResponse{}, err
 }
 
 func (s *Server) RemoveBlob(ctx context.Context, req *blobv1.RemoveBlobRequest) (*blobv1.RemoveBlobResponse, error) {
 	err := s.storage.RemoveBlob(ctx, req.GetBlobName())
+
 	return &blobv1.RemoveBlobResponse{}, err
 }
