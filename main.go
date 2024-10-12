@@ -1,7 +1,16 @@
 package main
 
-import "github.com/cmgsj/blob/pkg/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/cmgsj/blob/pkg/cmd/blob"
+)
 
 func main() {
-	cmd.NewCmdBlob().Execute()
+	err := blob.NewCmdBlob().Execute()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
 }

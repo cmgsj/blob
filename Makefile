@@ -41,7 +41,7 @@ binary: gen
 	fi; \
 	ldflags="-s -w -extldflags='-static'"; \
 	if [[ -n "$${version}" ]]; then \
-		ldflags+=" -X 'github.com/cmgsj/blob/pkg/cmd.version=$${version}'"; \
+		ldflags+=" -X 'github.com/cmgsj/blob/pkg/cmd/blob.version=$${version}'"; \
 	fi; \
 	flags=(-trimpath -ldflags="$${ldflags}"); \
 	if [[ "$${cmd}" == "build" ]]; then \
