@@ -45,7 +45,7 @@ binary: gen
 	fi; \
 	flags=(-trimpath -ldflags="$${ldflags}"); \
 	if [[ "$${cmd}" == "build" ]]; then \
-		flags+=(-o "bin/goserve"); \
+		flags+=(-o "bin/blob"); \
 	fi; \
-	echo "$${cmd}ing goserve@$${version} $$(go env GOOS)/$$(go env GOARCH) cgo=$$(go env CGO_ENABLED)"; \
+	echo "$${cmd}ing blob@$${version} $$(go env GOOS)/$$(go env GOARCH) cgo=$$(go env CGO_ENABLED)"; \
 	go "$${cmd}" "$${flags[@]}" .
