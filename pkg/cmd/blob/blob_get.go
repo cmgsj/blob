@@ -31,7 +31,7 @@ func NewCmdGet(c *cli.Config) *cobra.Command {
 
 			resp.Blob.Content = nil
 
-			return cli.JSON(resp)
+			return c.PrintJSON(resp)
 		},
 	}
 

@@ -32,7 +32,13 @@ func NewCmdServerHealth(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			fmt.Printf("%s: %s\n", service, healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())])
+			status := healthv1.HealthCheckResponse_ServingStatus_name[int32(resp.GetStatus())]
+
+			if service != "" {
+				fmt.Printf("%s (%s)\n", status, service)
+			} else {
+				fmt.Printf("%s\n", status)
+			}
 
 			return nil
 		},

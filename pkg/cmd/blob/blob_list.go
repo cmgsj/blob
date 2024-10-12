@@ -37,7 +37,7 @@ func NewCmdList(c *cli.Config) *cobra.Command {
 				return nil
 			}
 
-			return cli.JSON(resp)
+			return c.PrintJSON(resp)
 		},
 	}
 

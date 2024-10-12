@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"encoding/json"
+	"os"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
@@ -10,8 +13,8 @@ import (
 )
 
 type ConfigOptions struct {
-	GRPCAddress func() string
-	HTTPAddress func() string
+	GRPCAddress string
+	HTTPAddress string
 }
 
 type Config struct {
@@ -24,12 +27,20 @@ func NewConfig(opts ConfigOptions) *Config {
 	}
 }
 
+func (c *Config) PrintJSON(v interface{}) error {
+	encoder := json.NewEncoder(os.Stdout)
+
+	encoder.SetIndent("", " ")
+
+	return encoder.Encode(v)
+}
+
 func (c *Config) GRPCAddress() string {
-	return c.opts.GRPCAddress()
+	return c.opts.GRPCAddress
 }
 
 func (c *Config) HTTPAddress() string {
-	return c.opts.HTTPAddress()
+	return c.opts.HTTPAddress
 }
 
 func (c *Config) BlobServiceClient() (blobv1.BlobServiceClient, error) {
@@ -59,5 +70,5 @@ func (c *Config) grpcDial() (conn *grpc.ClientConn, err error) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	return grpc.NewClient(c.opts.GRPCAddress(), opts...)
+	return grpc.NewClient(c.opts.GRPCAddress, opts...)
 }

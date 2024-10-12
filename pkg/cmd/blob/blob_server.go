@@ -10,7 +10,6 @@ func NewCmdServer(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "server",
 		Short: "blob server",
-		Run:   cli.Help,
 	}
 
 	cmd.AddCommand(

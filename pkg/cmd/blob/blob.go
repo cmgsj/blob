@@ -16,10 +16,14 @@ func NewCmdBlob() *cobra.Command {
 	var httpAddress string = "127.0.0.1:8080"
 
 	cmd := &cobra.Command{
-		Use:     "blob",
-		Short:   "blob CLI",
-		Run:     cli.Help,
-		Version: version,
+		Use:   "blob",
+		Short: "blob CLI",
+		CompletionOptions: cobra.CompletionOptions{
+			HiddenDefaultCmd: true,
+		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		Version:       version,
 	}
 
 	cmd.PersistentFlags().StringVar(&grpcAddress, "grpc-address", grpcAddress, "blob server grpc address")
@@ -32,8 +36,8 @@ func NewCmdBlob() *cobra.Command {
 	viper.BindPFlags(cmd.PersistentFlags())
 
 	c := cli.NewConfig(cli.ConfigOptions{
-		GRPCAddress: func() string { return viper.GetString("grpc-address") },
-		HTTPAddress: func() string { return viper.GetString("http-address") },
+		GRPCAddress: viper.GetString("grpc-address"),
+		HTTPAddress: viper.GetString("http-address"),
 	})
 
 	cmd.AddCommand(

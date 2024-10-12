@@ -12,6 +12,8 @@ import (
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+	reflectionv1 "google.golang.org/grpc/reflection/grpc_reflection_v1"
+	reflectionv1alpha "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 
 	"github.com/cmgsj/blob/pkg/blob"
 	"github.com/cmgsj/blob/pkg/blob/storage"
@@ -42,6 +44,9 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 			healthv1.RegisterHealthServer(grpcServer, healthServer)
 			blobv1.RegisterBlobServiceServer(grpcServer, blobServer)
 
+			healthServer.SetServingStatus(reflectionv1.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(healthv1.Health_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 			healthServer.SetServingStatus(blobv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
 			rmux := runtime.NewServeMux()
