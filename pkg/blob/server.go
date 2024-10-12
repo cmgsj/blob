@@ -3,19 +3,24 @@ package blob
 import (
 	"context"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-var ServiceName = blobv1.BlobService_ServiceDesc.ServiceName
+var (
+	ErrBlobNotFound = status.Error(codes.NotFound, "blob not found")
+)
 
 type Server struct {
 	blobv1.UnimplementedBlobServiceServer
 	storage Storage
 }
 
-func NewServer() blobv1.BlobServiceServer {
+func NewServer(storage Storage) blobv1.BlobServiceServer {
 	return &Server{
-		storage: NewInMemoryStorage(),
+		storage: storage,
 	}
 }
 
@@ -25,7 +30,10 @@ func (s *Server) ListBlobs(ctx context.Context, req *blobv1.ListBlobsRequest) (*
 		return nil, err
 	}
 
-	return &blobv1.ListBlobsResponse{BlobNames: blobs, Count: uint64(len(blobs))}, nil
+	return &blobv1.ListBlobsResponse{
+		BlobNames: blobs,
+		Count:     uint64(len(blobs)),
+	}, nil
 }
 
 func (s *Server) GetBlob(ctx context.Context, req *blobv1.GetBlobRequest) (*blobv1.GetBlobResponse, error) {
@@ -34,7 +42,9 @@ func (s *Server) GetBlob(ctx context.Context, req *blobv1.GetBlobRequest) (*blob
 		return nil, err
 	}
 
-	return &blobv1.GetBlobResponse{Blob: blob}, nil
+	return &blobv1.GetBlobResponse{
+		Blob: blob,
+	}, nil
 }
 
 func (s *Server) WriteBlob(ctx context.Context, req *blobv1.WriteBlobRequest) (*blobv1.WriteBlobResponse, error) {

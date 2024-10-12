@@ -31,8 +31,8 @@ func NewLogger() FullInterceptor {
 	}
 }
 
-func SlogAdapter(log *slog.Logger) logging.Logger {
+func SlogAdapter(logger *slog.Logger) logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, level logging.Level, msg string, fields ...any) {
-		log.Log(ctx, slog.Level(level), msg, fields...)
+		logger.Log(ctx, slog.Level(level), msg, fields...)
 	})
 }

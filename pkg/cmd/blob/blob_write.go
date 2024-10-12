@@ -18,6 +18,8 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 		Short: "write blob",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
 			req := &blobv1.WriteBlobRequest{
 				BlobName: args[0],
 			}
@@ -33,12 +35,12 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			client, err := c.BlobServiceClient()
+			blobClient, err := c.BlobServiceClient()
 			if err != nil {
 				return err
 			}
 
-			_, err = client.WriteBlob(cmd.Context(), req)
+			_, err = blobClient.WriteBlob(ctx, req)
 			return err
 		},
 	}

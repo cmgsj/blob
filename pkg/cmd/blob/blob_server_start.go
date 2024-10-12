@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/cmgsj/blob/pkg/blob"
+	"github.com/cmgsj/blob/pkg/blob/storage"
 	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/docs"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
@@ -26,6 +27,8 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		Short: "start blob server",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
 			logger := interceptors.NewLogger()
 
 			grpcServer := grpc.NewServer(
@@ -33,25 +36,28 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 				grpc.StreamInterceptor(logger.StreamServerInterceptor()),
 			)
 			healthServer := health.NewServer()
-			blobServer := blob.NewServer()
+			blobServer := blob.NewServer(storage.InMemory())
 
 			reflection.Register(grpcServer)
 			healthv1.RegisterHealthServer(grpcServer, healthServer)
 			blobv1.RegisterBlobServiceServer(grpcServer, blobServer)
 
-			healthServer.SetServingStatus(blob.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(blobv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
 			rmux := runtime.NewServeMux()
-			client, err := c.BlobServiceClient()
+
+			blobClient, err := c.BlobServiceClient()
 			if err != nil {
 				return err
 			}
-			err = blobv1.RegisterBlobServiceHandlerClient(cmd.Context(), rmux, client)
+
+			err = blobv1.RegisterBlobServiceHandlerClient(ctx, rmux, blobClient)
 			if err != nil {
 				return err
 			}
 
 			mux := http.NewServeMux()
+
 			mux.Handle("/", rmux)
 			mux.Handle("/docs/", swagger.Docs("/docs/", docs.SwaggerSchema()))
 
@@ -63,10 +69,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 					errch <- err
 				}
 				slog.Info("started listening", "protocol", "http", "address", c.HTTPAddress())
-				err = http.Serve(lis, mux)
-				if err != nil {
-					errch <- err
-				}
+				errch <- http.Serve(lis, mux)
 			}()
 
 			go func() {
@@ -75,17 +78,10 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 					errch <- err
 				}
 				slog.Info("started listening", "protocol", "grpc", "address", c.GRPCAddress())
-				err = grpcServer.Serve(lis)
-				if err != nil {
-					errch <- err
-				}
+				errch <- grpcServer.Serve(lis)
 			}()
 
-			for err := range errch {
-				return err
-			}
-
-			return nil
+			return <-errch
 		},
 	}
 

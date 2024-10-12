@@ -13,16 +13,18 @@ func NewCmdGet(c *cli.Config) *cobra.Command {
 		Short: "get blob",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := &blobv1.GetBlobRequest{
-				BlobName: args[0],
-			}
+			ctx := cmd.Context()
 
-			client, err := c.BlobServiceClient()
+			blobName := args[0]
+
+			blobClient, err := c.BlobServiceClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.GetBlob(cmd.Context(), req)
+			resp, err := blobClient.GetBlob(ctx, &blobv1.GetBlobRequest{
+				BlobName: blobName,
+			})
 			if err != nil {
 				return err
 			}

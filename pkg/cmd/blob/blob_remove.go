@@ -13,16 +13,18 @@ func NewCmdRemove(c *cli.Config) *cobra.Command {
 		Short: "remove blob",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := &blobv1.RemoveBlobRequest{
-				BlobName: args[0],
-			}
+			ctx := cmd.Context()
 
-			client, err := c.BlobServiceClient()
+			blobName := args[0]
+
+			blobClient, err := c.BlobServiceClient()
 			if err != nil {
 				return err
 			}
 
-			_, err = client.RemoveBlob(cmd.Context(), req)
+			_, err = blobClient.RemoveBlob(ctx, &blobv1.RemoveBlobRequest{
+				BlobName: blobName,
+			})
 			return err
 		},
 	}

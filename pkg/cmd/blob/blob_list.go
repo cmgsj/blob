@@ -13,20 +13,22 @@ func NewCmdList(c *cli.Config) *cobra.Command {
 		Short: "list blobs",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := &blobv1.ListBlobsRequest{
-				Path: "/",
-			}
+			ctx := cmd.Context()
+
+			path := "/"
 
 			if len(args) > 0 {
-				req.Path = args[0]
+				path = args[0]
 			}
 
-			client, err := c.BlobServiceClient()
+			blobClient, err := c.BlobServiceClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.ListBlobs(cmd.Context(), req)
+			resp, err := blobClient.ListBlobs(ctx, &blobv1.ListBlobsRequest{
+				Path: path,
+			})
 			if err != nil {
 				return err
 			}

@@ -27,7 +27,7 @@
     "/api/v1/blob": {
       "get": {
         "summary": "List blobs",
-        "operationId": "list-blobs",
+        "operationId": "list_blobs",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -63,7 +63,7 @@
     "/api/v1/blob/{blobName}": {
       "get": {
         "summary": "Get blob",
-        "operationId": "get-blob",
+        "operationId": "get_blob",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -97,7 +97,7 @@
       },
       "delete": {
         "summary": "Remove blob",
-        "operationId": "remove-blob",
+        "operationId": "remove_blob",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -131,7 +131,7 @@
       },
       "post": {
         "summary": "Write blob",
-        "operationId": "write-blob",
+        "operationId": "write_blob",
         "responses": {
           "200": {
             "description": "A successful response.",

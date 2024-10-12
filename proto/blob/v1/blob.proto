@@ -39,7 +39,7 @@ service BlobService {
     option (google.api.http) = {get: "/api/v1/blob"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "List blobs"
-      operation_id: "list-blobs"
+      operation_id: "list_blobs"
       tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
@@ -50,7 +50,7 @@ service BlobService {
     option (google.api.http) = {get: "/api/v1/blob/{blob_name}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Get blob"
-      operation_id: "get-blob"
+      operation_id: "get_blob"
       tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
@@ -64,7 +64,7 @@ service BlobService {
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Write blob"
-      operation_id: "write-blob"
+      operation_id: "write_blob"
       tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
@@ -75,7 +75,7 @@ service BlobService {
     option (google.api.http) = {delete: "/api/v1/blob/{blob_name}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Remove blob"
-      operation_id: "remove-blob"
+      operation_id: "remove_blob"
       tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
