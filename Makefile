@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 
+MODULE := $$(go list -m)
 VERSION := 1.0.0
 
 .PHONY: default
@@ -7,8 +8,10 @@ default: fmt build install
 
 .PHONY: fmt
 fmt:
-	@go fmt ./...
-	@goimports -w -local github.com/cmgsj/blob $$(find . -type f -name "*.go" ! -path "./vendor/*")
+	@find . -type f -name "*.go" ! -path "./pkg/gen/*" ! -path "./vendor/*" | while read -r file; do \
+		go fmt "$${file}" 2>&1 | grep -v "is a program, not an importable package"; \
+		goimports -w -local $(MODULE) "$${file}"; \
+	done
 
 .PHONY: gen
 gen:
@@ -41,7 +44,7 @@ binary: gen
 	fi; \
 	ldflags="-s -w -extldflags='-static'"; \
 	if [[ -n "$${version}" ]]; then \
-		ldflags+=" -X 'github.com/cmgsj/blob/pkg/cmd/blob.version=$${version}'"; \
+		ldflags+=" -X '$(MODULE)/pkg/cmd/blob.version=$${version}'"; \
 	fi; \
 	flags=(-trimpath -ldflags="$${ldflags}"); \
 	if [[ "$${cmd}" == "build" ]]; then \

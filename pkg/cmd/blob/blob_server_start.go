@@ -11,6 +11,7 @@ import (
 	"github.com/cmgsj/go-lib/swagger"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
@@ -27,7 +28,7 @@ import (
 )
 
 func NewCmdServerStart(c *cli.Config) *cobra.Command {
-	var storage string = ":memory:"
+	defaultStorage := ":memory:"
 
 	cmd := &cobra.Command{
 		Use:   "start",
@@ -35,6 +36,8 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
+			storage := viper.GetString("storage")
 
 			blobStorage, err := parseBlobStorage(ctx, storage)
 			if err != nil {
@@ -101,7 +104,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&storage, "storage", storage, "blob storage url")
+	cmd.Flags().String("storage", defaultStorage, "blob storage url")
 
 	return cmd
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/cmgsj/blob/pkg/cli"
@@ -11,7 +12,7 @@ import (
 )
 
 func NewCmdServerHealth(c *cli.Config) *cobra.Command {
-	var service string = blobv1.BlobService_ServiceDesc.ServiceName
+	defaultService := blobv1.BlobService_ServiceDesc.ServiceName
 
 	cmd := &cobra.Command{
 		Use:   "health",
@@ -19,6 +20,8 @@ func NewCmdServerHealth(c *cli.Config) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
+			service := viper.GetString("service")
 
 			healthClient, err := c.HealthClient()
 			if err != nil {
@@ -44,7 +47,7 @@ func NewCmdServerHealth(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&service, "service", service, "grpc service")
+	cmd.Flags().String("service", defaultService, "grpc service")
 
 	return cmd
 }

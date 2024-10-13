@@ -5,13 +5,14 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/cmgsj/blob/pkg/cli"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
 func NewCmdWrite(c *cli.Config) *cobra.Command {
-	var file string
+	defaultFile := ""
 
 	cmd := &cobra.Command{
 		Use:   "write",
@@ -20,16 +21,16 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			req := &blobv1.WriteBlobRequest{
-				BlobName: args[0],
-			}
+			blobName := args[0]
+			file := viper.GetString("file")
 
+			var content []byte
 			var err error
 
-			if file == "" {
-				req.Content, err = io.ReadAll(os.Stdin)
+			if file == "" || file == "-" {
+				content, err = io.ReadAll(os.Stdin)
 			} else {
-				req.Content, err = os.ReadFile(file)
+				content, err = os.ReadFile(defaultFile)
 			}
 			if err != nil {
 				return err
@@ -40,12 +41,15 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			_, err = blobClient.WriteBlob(ctx, req)
+			_, err = blobClient.WriteBlob(ctx, &blobv1.WriteBlobRequest{
+				BlobName: blobName,
+				Content:  content,
+			})
 			return err
 		},
 	}
 
-	cmd.Flags().StringVarP(&file, "file", "f", file, "input file")
+	cmd.Flags().StringP("file", "f", defaultFile, "input file")
 
 	return cmd
 }
