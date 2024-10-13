@@ -2,7 +2,8 @@
 
 export STORAGE_EMULATOR_HOST="http://localhost:4443"
 
-blob server start --gcs-uri='http://localhost:4443/storage/v1/cmgsj'
+blob server start \
+	--gcs-uri='http://localhost:4443/storage/v1/cmgsj'
 
 # List buckets
 # curl -sSL "${STORAGE_EMULATOR_HOST}/storage/v1/b" | jq
