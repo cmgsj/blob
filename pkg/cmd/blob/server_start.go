@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"maps"
 	"net"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/cmgsj/go-lib/swagger"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -103,8 +106,6 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("storage", "memory", "blob storage type")
-
 	cmd.Flags().String("gcs-uri", "", "gcs uri")
 
 	cmd.Flags().String("minio-address", "", "minio address")
@@ -122,24 +123,49 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 }
 
 func newBlobStorage(ctx context.Context) (storage.Storage, error) {
-	storage := viper.GetString("storage")
+	storageTypes := []string{
+		"gcs",
+		"minio",
+		"mongodb",
+	}
 
-	switch storage {
+	storageTypeSet := make(map[string]struct{})
+
+	for _, key := range viper.AllKeys() {
+		for _, storageType := range storageTypes {
+			if strings.HasPrefix(key, storageType) && viper.IsSet(key) {
+				storageTypeSet[storageType] = struct{}{}
+				break
+			}
+		}
+	}
+
+	storageTypes = slices.Collect(maps.Keys(storageTypeSet))
+
+	if len(storageTypes) > 1 {
+		return nil, fmt.Errorf("multiple blob storages set: [%s]", strings.Join(storageTypes, ", "))
+	}
+
+	if len(storageTypes) == 0 {
+		storageTypes = []string{"memory"}
+	}
+
+	storageType := storageTypes[0]
+
+	var storage storage.Storage
+	var err error
+
+	switch storageType {
 	case "memory":
-		return memory.NewStorage(), nil
+		storage = memory.NewStorage()
 
 	case "gcs":
-		return gcs.NewStorage(ctx, gcs.StorageOptions{
+		storage, err = gcs.NewStorage(ctx, gcs.StorageOptions{
 			URI: viper.GetString("gcs-uri"),
 		})
 
-	case "mongodb":
-		return mongodb.NewStorage(ctx, mongodb.StorageOptions{
-			URI: viper.GetString("mongodb-uri"),
-		})
-
 	case "minio":
-		return minio.NewStorage(ctx, minio.StorageOptions{
+		storage, err = minio.NewStorage(ctx, minio.StorageOptions{
 			Address:      viper.GetString("minio-address"),
 			AccessKey:    viper.GetString("minio-access-key"),
 			SecretKey:    viper.GetString("minio-secret-key"),
@@ -147,7 +173,20 @@ func newBlobStorage(ctx context.Context) (storage.Storage, error) {
 			Bucket:       viper.GetString("minio-bucket"),
 			ObjectPrefix: viper.GetString("minio-object-prefix"),
 		})
+
+	case "mongodb":
+		storage, err = mongodb.NewStorage(ctx, mongodb.StorageOptions{
+			URI: viper.GetString("mongodb-uri"),
+		})
+
+	default:
+		return nil, fmt.Errorf("unknown blob storage %q", storageType)
+	}
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, fmt.Errorf("unknown blob storage %q", storage)
+	slog.Info("using blob storage", "type", storageType)
+
+	return storage, nil
 }
