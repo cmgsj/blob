@@ -45,8 +45,8 @@ func NewCmdBlob() *cobra.Command {
 		NewCmdList(c),
 		NewCmdRead(c),
 		NewCmdRemove(c),
-		NewCmdWrite(c),
 		NewCmdServer(c),
+		NewCmdWrite(c),
 	)
 
 	return cmd

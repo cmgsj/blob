@@ -1,9 +1,12 @@
 package blob
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 
 	"github.com/cmgsj/go-lib/swagger"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -24,6 +27,8 @@ import (
 )
 
 func NewCmdServerStart(c *cli.Config) *cobra.Command {
+	var storage string = ":memory:"
+
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "start blob server",
@@ -31,23 +36,29 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
+			blobStorage, err := parseBlobStorage(ctx, storage)
+			if err != nil {
+				return err
+			}
+
+			blobServer := blob.NewServer(blobStorage)
+
+			healthServer := health.NewServer()
+			healthServer.SetServingStatus(blobv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(healthv1.Health_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(reflectionv1.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+
 			logger := interceptors.NewLogger()
 
 			grpcServer := grpc.NewServer(
 				grpc.UnaryInterceptor(logger.UnaryServerInterceptor()),
 				grpc.StreamInterceptor(logger.StreamServerInterceptor()),
 			)
-			healthServer := health.NewServer()
-			blobServer := blob.NewServer(storage.InMemory())
 
-			reflection.Register(grpcServer)
-			healthv1.RegisterHealthServer(grpcServer, healthServer)
 			blobv1.RegisterBlobServiceServer(grpcServer, blobServer)
-
-			healthServer.SetServingStatus(reflectionv1.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
-			healthServer.SetServingStatus(reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
-			healthServer.SetServingStatus(healthv1.Health_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
-			healthServer.SetServingStatus(blobv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthv1.RegisterHealthServer(grpcServer, healthServer)
+			reflection.Register(grpcServer)
 
 			rmux := runtime.NewServeMux()
 
@@ -90,5 +101,28 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVar(&storage, "storage", storage, "blob storage url")
+
 	return cmd
+}
+
+func parseBlobStorage(ctx context.Context, uri string) (blob.Storage, error) {
+	if uri == ":memory:" {
+		return storage.NewInMemoryStorage(), nil
+	}
+
+	u, err := url.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	switch u.Scheme {
+	case "gs":
+		return storage.NewGoogleCloudStorage(ctx, uri)
+
+	case "mongodb", "mongodb+srv":
+		return storage.NewMongoDBStorage(ctx, uri)
+	}
+
+	return nil, fmt.Errorf("unknown storage %q", uri)
 }

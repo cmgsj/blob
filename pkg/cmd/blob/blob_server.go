@@ -13,8 +13,8 @@ func NewCmdServer(c *cli.Config) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		NewCmdServerStart(c),
 		NewCmdServerHealth(c),
+		NewCmdServerStart(c),
 	)
 
 	return cmd

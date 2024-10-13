@@ -12,7 +12,7 @@ fmt:
 
 .PHONY: gen
 gen:
-	@buf format --write proto && buf generate --template proto/buf.gen.yaml proto
+	@buf format --write && buf generate
 
 .PHONY: test
 test:

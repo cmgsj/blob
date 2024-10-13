@@ -11,6 +11,6 @@ func main() {
 	err := blob.NewCmdBlob().Execute()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(2)
+		os.Exit(1)
 	}
 }
