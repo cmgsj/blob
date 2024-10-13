@@ -27,7 +27,7 @@ services:
     image: minio/mc
     depends_on:
       - minio
-    entrypoint: >
+    entrypoint: |
       /bin/bash -c "sleep 5 && mc config host add local http://minio:9000 root password && (mc rm -r --force local/cmgsj; mc mb local/cmgsj)"
 
   mongodb:
