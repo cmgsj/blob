@@ -23,14 +23,14 @@ func NewStorage() *Storage {
 }
 
 func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
-	prefix := util.BlobNamePrefix(path)
+	path = util.BlobPath(path)
 
 	var blobNames []string
 
 	s.m.Range(func(key, value any) bool {
 		name := key.(string)
 
-		if strings.HasPrefix(name, prefix) {
+		if strings.HasPrefix(name, path) {
 			blobNames = append(blobNames, name)
 		}
 

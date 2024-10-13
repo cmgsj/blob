@@ -52,9 +52,11 @@ func NewStorage(ctx context.Context, uri string, opts ...*options.ClientOptions)
 }
 
 func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
+	path = util.BlobPath(path)
+
 	cursor, err := s.collection.Find(ctx, bson.M{
 		"name": bson.M{
-			"$regex": fmt.Sprintf("^%s", util.BlobNamePrefix(path)),
+			"$regex": "^" + path,
 		},
 	})
 	if err != nil {

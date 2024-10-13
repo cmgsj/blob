@@ -55,21 +55,23 @@ func NewStorage(ctx context.Context, uri string, opts ...option.ClientOption) (*
 		bucketName = path[2]
 
 		if len(path) > 3 {
-			bucketPrefix = path[3]
+			bucketPrefix = strings.Join(path[3:], "/")
 		}
 
-		opts = append(opts, option.WithEndpoint(fmt.Sprintf("%s://%s/%s/%s", u.Scheme, u.Host, path[0], path[1])))
+		endpoint := fmt.Sprintf("%s://%s/%s/%s/", u.Scheme, u.Host, path[0], path[1])
+
+		opts = append(opts, option.WithEndpoint(endpoint))
 
 	default:
 		return nil, fmt.Errorf("invalid google cloud storage uri %q: unknown scheme", uri)
 	}
 
-	storageClient, err := gcs.NewClient(ctx, opts...)
+	gcsClient, err := gcs.NewClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	bucket := storageClient.Bucket(bucketName)
+	bucket := gcsClient.Bucket(bucketName)
 
 	_, err = bucket.Attrs(ctx)
 	if err != nil {
@@ -79,7 +81,7 @@ func NewStorage(ctx context.Context, uri string, opts ...option.ClientOption) (*
 	folder := BlobStorageFolder
 
 	if bucketPrefix != "" {
-		folder = util.JoinBlobPath(bucketPrefix, folder)
+		folder = util.BlobPath(bucketPrefix, folder)
 	}
 
 	return &Storage{
@@ -89,8 +91,10 @@ func NewStorage(ctx context.Context, uri string, opts ...option.ClientOption) (*
 }
 
 func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
+	path = util.BlobPath(s.folder, path)
+
 	it := s.bucket.Objects(ctx, &gcs.Query{
-		Prefix: util.JoinBlobPath(s.folder, path),
+		Prefix: path,
 	})
 
 	var blobNames []string
@@ -113,7 +117,9 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 }
 
 func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
-	reader, err := s.bucket.Object(name).NewReader(ctx)
+	path := util.BlobPath(s.folder, name)
+
+	reader, err := s.bucket.Object(path).NewReader(ctx)
 	if err != nil {
 		if errors.Is(err, gcs.ErrObjectNotExist) {
 			return nil, storage.ErrBlobNotFound
@@ -132,7 +138,7 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 		return nil, err
 	}
 
-	attrs, err := s.bucket.Object(name).Attrs(ctx)
+	attrs, err := s.bucket.Object(path).Attrs(ctx)
 	if err != nil {
 		if errors.Is(err, gcs.ErrObjectNotExist) {
 			return nil, storage.ErrBlobNotFound
@@ -149,7 +155,9 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 }
 
 func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) error {
-	writer := s.bucket.Object(name).NewWriter(ctx)
+	path := util.BlobPath(s.folder, name)
+
+	writer := s.bucket.Object(path).NewWriter(ctx)
 
 	_, err := writer.Write(content)
 	if err != nil {
@@ -165,7 +173,9 @@ func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) er
 }
 
 func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
-	err := s.bucket.Object(name).Delete(ctx)
+	path := util.BlobPath(s.folder, name)
+
+	err := s.bucket.Object(path).Delete(ctx)
 	if err != nil {
 		if errors.Is(err, gcs.ErrObjectNotExist) {
 			return storage.ErrBlobNotFound
