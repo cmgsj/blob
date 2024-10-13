@@ -7,33 +7,30 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"slices"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 
-	"github.com/cmgsj/blob/pkg/blob/storage"
-	"github.com/cmgsj/blob/pkg/blob/storage/util"
-	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver"
 )
 
-var _ storage.Storage = (*Storage)(nil)
+var _ driver.Driver = (*Driver)(nil)
 
-type Storage struct {
+type Driver struct {
 	s3Client     *s3.Client
 	bucket       string
 	objectPrefix string
 }
 
-type StorageOptions struct {
+type DriverOptions struct {
 	URI       string
 	AccessKey string
 	SecretKey string
 }
 
-func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
+func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 	u, err := url.Parse(opts.URI)
 	if err != nil {
 		return nil, err
@@ -81,23 +78,38 @@ func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
 		}),
 	})
 
-	_, err = s3Client.HeadBucket(ctx, &s3.HeadBucketInput{
-		Bucket: aws.String(bucket),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &Storage{
+	return &Driver{
 		s3Client:     s3Client,
 		bucket:       bucket,
-		objectPrefix: util.BlobObjectPrefix(objectPrefix),
+		objectPrefix: objectPrefix,
 	}, nil
 }
 
-func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
-	path = util.BlobPath(s.objectPrefix, path)
+func (d *Driver) Bucket() string {
+	return d.bucket
+}
 
+func (d *Driver) ObjectPrefix() string {
+	return d.objectPrefix
+}
+
+func (d *Driver) BucketExists(ctx context.Context, bucket string) (bool, error) {
+	_, err := d.s3Client.HeadBucket(ctx, &s3.HeadBucketInput{
+		Bucket: aws.String(bucket),
+	})
+	if err != nil {
+		var e *types.NoSuchBucket
+		if errors.As(err, &e) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
 	objects, err := s.s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: aws.String(s.bucket),
 		Prefix: aws.String(path),
@@ -106,78 +118,51 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 		return nil, err
 	}
 
-	var blobNames []string
+	var objectNames []string
 
 	for _, object := range objects.Contents {
-		blobNames = append(blobNames, util.BlobPath(strings.TrimPrefix(*object.Key, s.objectPrefix)))
+		objectNames = append(objectNames, *object.Key)
 	}
 
-	slices.Sort(blobNames)
-
-	return blobNames, nil
+	return objectNames, nil
 }
 
-func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
-	path := util.BlobPath(s.objectPrefix, name)
-
+func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
 	object, err := s.s3Client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
-		Key:    aws.String(path),
+		Key:    aws.String(name),
 	})
 	if err != nil {
-		var e *types.NoSuchKey
-
-		if errors.As(err, &e) {
-			return nil, storage.ErrBlobNotFound
-		}
-
-		return nil, err
+		return nil, 0, err
 	}
 	defer object.Body.Close()
 
 	content, err := io.ReadAll(object.Body)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &blobv1.Blob{
-		Name:      name,
-		Content:   content,
-		UpdatedAt: object.LastModified.Unix(),
-	}, nil
+	return content, object.LastModified.Unix(), nil
 }
 
-func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) error {
-	path := util.BlobPath(s.objectPrefix, name)
-
+func (s *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
 	_, err := s.s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
-		Key:    aws.String(path),
+		Key:    aws.String(name),
 		Body:   bytes.NewReader(content),
 	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
-func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
-	path := util.BlobPath(s.objectPrefix, name)
-
+func (s *Driver) RemoveObject(ctx context.Context, name string) error {
 	_, err := s.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(s.bucket),
-		Key:    aws.String(path),
+		Key:    aws.String(name),
 	})
-	if err != nil {
-		var e *types.NoSuchKey
+	return err
+}
 
-		if errors.As(err, &e) {
-			return storage.ErrBlobNotFound
-		}
-
-		return err
-	}
-
-	return nil
+func (d *Driver) IsObjectNotFound(err error) bool {
+	var e *types.NoSuchKey
+	return errors.As(err, &e)
 }

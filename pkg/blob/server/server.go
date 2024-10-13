@@ -7,12 +7,14 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
+var _ blobv1.BlobServiceServer = (*Server)(nil)
+
 type Server struct {
 	blobv1.UnimplementedBlobServiceServer
-	storage storage.Storage
+	storage *storage.Storage
 }
 
-func NewServer(storage storage.Storage) blobv1.BlobServiceServer {
+func NewServer(storage *storage.Storage) *Server {
 	return &Server{
 		storage: storage,
 	}

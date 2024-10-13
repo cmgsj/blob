@@ -23,10 +23,11 @@ import (
 
 	blobserver "github.com/cmgsj/blob/pkg/blob/server"
 	"github.com/cmgsj/blob/pkg/blob/storage"
-	"github.com/cmgsj/blob/pkg/blob/storage/gcs"
-	"github.com/cmgsj/blob/pkg/blob/storage/memory"
-	"github.com/cmgsj/blob/pkg/blob/storage/minio"
-	"github.com/cmgsj/blob/pkg/blob/storage/s3"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver/gcs"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver/memory"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver/minio"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver/s3"
 	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/docs"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
@@ -41,7 +42,12 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			blobStorage, err := newBlobStorage(ctx)
+			blobStorageDriver, err := newBlobStorageDriver(ctx)
+			if err != nil {
+				return err
+			}
+
+			blobStorage, err := storage.NewStorage(ctx, blobStorageDriver)
 			if err != nil {
 				return err
 			}
@@ -124,57 +130,57 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 	return cmd
 }
 
-func newBlobStorage(ctx context.Context) (storage.Storage, error) {
-	storageTypes := []string{
+func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
+	driverTypes := []string{
 		"gcs",
 		"s3",
 		"minio",
 	}
 
-	storageTypeSet := make(map[string]struct{})
+	driverTypeSet := make(map[string]struct{})
 
 	for _, key := range viper.AllKeys() {
-		for _, storageType := range storageTypes {
-			if strings.HasPrefix(key, storageType) && viper.IsSet(key) {
-				storageTypeSet[storageType] = struct{}{}
+		for _, driverType := range driverTypes {
+			if strings.HasPrefix(key, driverType) && viper.IsSet(key) {
+				driverTypeSet[driverType] = struct{}{}
 				break
 			}
 		}
 	}
 
-	storageTypes = slices.Collect(maps.Keys(storageTypeSet))
+	driverTypes = slices.Collect(maps.Keys(driverTypeSet))
 
-	if len(storageTypes) > 1 {
-		return nil, fmt.Errorf("multiple blob storages set: [%s]", strings.Join(storageTypes, ", "))
+	if len(driverTypes) > 1 {
+		return nil, fmt.Errorf("multiple blob storage drivers set: [%s]", strings.Join(driverTypes, ", "))
 	}
 
-	if len(storageTypes) == 0 {
-		storageTypes = []string{"memory"}
+	if len(driverTypes) == 0 {
+		driverTypes = []string{"memory"}
 	}
 
-	storageType := storageTypes[0]
+	driverType := driverTypes[0]
 
-	var storage storage.Storage
+	var driver driver.Driver
 	var err error
 
-	switch storageType {
+	switch driverType {
 	case "memory":
-		storage = memory.NewStorage()
+		driver = memory.NewDriver()
 
 	case "gcs":
-		storage, err = gcs.NewStorage(ctx, gcs.StorageOptions{
+		driver, err = gcs.NewDriver(ctx, gcs.DriverOptions{
 			URI: viper.GetString("gcs-uri"),
 		})
 
 	case "s3":
-		storage, err = s3.NewStorage(ctx, s3.StorageOptions{
+		driver, err = s3.NewDriver(ctx, s3.DriverOptions{
 			URI:       viper.GetString("s3-uri"),
 			AccessKey: viper.GetString("s3-access-key"),
 			SecretKey: viper.GetString("s3-secret-key"),
 		})
 
 	case "minio":
-		storage, err = minio.NewStorage(ctx, minio.StorageOptions{
+		driver, err = minio.NewDriver(ctx, minio.DriverOptions{
 			Address:      viper.GetString("minio-address"),
 			AccessKey:    viper.GetString("minio-access-key"),
 			SecretKey:    viper.GetString("minio-secret-key"),
@@ -184,13 +190,13 @@ func newBlobStorage(ctx context.Context) (storage.Storage, error) {
 		})
 
 	default:
-		return nil, fmt.Errorf("unknown blob storage %q", storageType)
+		return nil, fmt.Errorf("unknown blob storage driver %q", driverType)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	slog.Info("using blob storage", "type", storageType)
+	slog.Info("using blob storage driver", "type", driverType)
 
-	return storage, nil
+	return driver, nil
 }
