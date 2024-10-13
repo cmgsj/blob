@@ -22,6 +22,7 @@ import (
 	"github.com/cmgsj/blob/pkg/blob/storage"
 	"github.com/cmgsj/blob/pkg/blob/storage/googlecloud"
 	"github.com/cmgsj/blob/pkg/blob/storage/memory"
+	"github.com/cmgsj/blob/pkg/blob/storage/minio"
 	"github.com/cmgsj/blob/pkg/blob/storage/mongodb"
 	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/docs"
@@ -120,6 +121,10 @@ func parseBlobStorage(ctx context.Context, uri string) (storage.Storage, error) 
 
 	if googlecloud.IsStorage(uri) {
 		return googlecloud.NewStorage(ctx, uri)
+	}
+
+	if minio.IsStorage(uri) {
+		return minio.NewStorage(ctx, uri, nil)
 	}
 
 	if mongodb.IsStorage(uri) {
