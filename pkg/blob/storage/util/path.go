@@ -2,6 +2,16 @@ package util
 
 import "strings"
 
+const BlobsPrefix = "blobs"
+
+func BlobObjectPrefix(prefix string) string {
+	if prefix == "" {
+		return BlobsPrefix
+	}
+
+	return BlobPath(prefix, BlobsPrefix)
+}
+
 func BlobPath(base string, elems ...string) string {
 	var path []string
 

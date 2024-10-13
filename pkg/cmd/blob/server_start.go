@@ -107,13 +107,10 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 	}
 
 	cmd.Flags().String("gcs-uri", "", "gcs uri")
-	cmd.Flags().String("gcs-bucket", "", "gcs bucket")
-	cmd.Flags().String("gcs-object-prefix", "", "gcs object prefix")
 
+	cmd.Flags().String("s3-uri", "", "s3 uri")
 	cmd.Flags().String("s3-access-key", "", "s3 access key")
 	cmd.Flags().String("s3-secret-key", "", "s3 secret key")
-	cmd.Flags().String("s3-bucket", "", "s3 bucket")
-	cmd.Flags().String("s3-object-prefix", "", "s3 object prefix")
 
 	cmd.Flags().String("minio-address", "", "minio address")
 	cmd.Flags().String("minio-access-key", "", "minio access key")
@@ -171,10 +168,9 @@ func newBlobStorage(ctx context.Context) (storage.Storage, error) {
 
 	case "s3":
 		storage, err = s3.NewStorage(ctx, s3.StorageOptions{
-			AccessKey:    viper.GetString("s3-access-key"),
-			SecretKey:    viper.GetString("s3-secret-key"),
-			Bucket:       viper.GetString("s3-bucket"),
-			ObjectPrefix: viper.GetString("s3-object-prefix"),
+			URI:       viper.GetString("s3-uri"),
+			AccessKey: viper.GetString("s3-access-key"),
+			SecretKey: viper.GetString("s3-secret-key"),
 		})
 
 	case "minio":

@@ -18,8 +18,6 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-const ObjectPrefix = "blobs"
-
 var _ storage.Storage = (*Storage)(nil)
 
 type Storage struct {
@@ -29,9 +27,7 @@ type Storage struct {
 }
 
 type StorageOptions struct {
-	URI         string
-	Bucket      string
-	ObjectPefix string
+	URI string
 }
 
 func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
@@ -44,13 +40,13 @@ func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
 		return nil, fmt.Errorf("invalid google cloud storage uri %q: host is required", opts.URI)
 	}
 
-	var bucketName string
+	var bucket string
 	var objectPrefix string
 	var clientOpts []option.ClientOption
 
 	switch u.Scheme {
 	case "gs":
-		bucketName = u.Host
+		bucket = u.Host
 		objectPrefix = u.Path
 
 	case "http", "https":
@@ -60,7 +56,7 @@ func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
 			return nil, fmt.Errorf("invalid google cloud storage uri %q: bucket is required", opts.URI)
 		}
 
-		bucketName = path[2]
+		bucket = path[2]
 
 		if len(path) > 3 {
 			objectPrefix = strings.Join(path[3:], "/")
@@ -79,21 +75,15 @@ func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
 		return nil, err
 	}
 
-	_, err = gcsClient.Bucket(bucketName).Attrs(ctx)
+	_, err = gcsClient.Bucket(bucket).Attrs(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if objectPrefix == "" {
-		objectPrefix = ObjectPrefix
-	} else {
-		objectPrefix = util.BlobPath(objectPrefix, ObjectPrefix)
-	}
-
 	return &Storage{
 		gcsClient:    gcsClient,
-		bucket:       bucketName,
-		objectPrefix: objectPrefix,
+		bucket:       bucket,
+		objectPrefix: util.BlobObjectPrefix(objectPrefix),
 	}, nil
 }
 

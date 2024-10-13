@@ -16,8 +16,6 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-const ObjectPrefix = "blobs"
-
 var _ storage.Storage = (*Storage)(nil)
 
 type Storage struct {
@@ -53,16 +51,10 @@ func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
 		return nil, fmt.Errorf("minio bucket %q does not exist", opts.Bucket)
 	}
 
-	if opts.ObjectPrefix == "" {
-		opts.ObjectPrefix = ObjectPrefix
-	} else {
-		opts.ObjectPrefix = util.BlobPath(opts.ObjectPrefix, ObjectPrefix)
-	}
-
 	return &Storage{
 		minioClient:  minioClient,
 		bucket:       opts.Bucket,
-		objectPrefix: opts.ObjectPrefix,
+		objectPrefix: util.BlobObjectPrefix(opts.ObjectPrefix),
 	}, nil
 }
 
