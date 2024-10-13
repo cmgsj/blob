@@ -108,7 +108,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 			return nil, err
 		}
 
-		blobNames = append(blobNames, attrs.Name)
+		blobNames = append(blobNames, util.BlobPath(strings.TrimPrefix(attrs.Name, s.folder)))
 	}
 
 	slices.Sort(blobNames)
