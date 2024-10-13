@@ -145,6 +145,92 @@ github.com/Microsoft/hcsshim/osversion
 # github.com/antlr4-go/antlr/v4 v4.13.1
 ## explicit; go 1.22
 github.com/antlr4-go/antlr/v4
+# github.com/aws/aws-sdk-go-v2 v1.32.2
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/aws
+github.com/aws/aws-sdk-go-v2/aws/arn
+github.com/aws/aws-sdk-go-v2/aws/defaults
+github.com/aws/aws-sdk-go-v2/aws/middleware
+github.com/aws/aws-sdk-go-v2/aws/protocol/xml
+github.com/aws/aws-sdk-go-v2/aws/ratelimit
+github.com/aws/aws-sdk-go-v2/aws/retry
+github.com/aws/aws-sdk-go-v2/aws/signer/internal/v4
+github.com/aws/aws-sdk-go-v2/aws/signer/v4
+github.com/aws/aws-sdk-go-v2/aws/transport/http
+github.com/aws/aws-sdk-go-v2/internal/auth
+github.com/aws/aws-sdk-go-v2/internal/auth/smithy
+github.com/aws/aws-sdk-go-v2/internal/context
+github.com/aws/aws-sdk-go-v2/internal/endpoints
+github.com/aws/aws-sdk-go-v2/internal/endpoints/awsrulesfn
+github.com/aws/aws-sdk-go-v2/internal/middleware
+github.com/aws/aws-sdk-go-v2/internal/rand
+github.com/aws/aws-sdk-go-v2/internal/sdk
+github.com/aws/aws-sdk-go-v2/internal/strings
+github.com/aws/aws-sdk-go-v2/internal/sync/singleflight
+github.com/aws/aws-sdk-go-v2/internal/timeconv
+# github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.6
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream
+github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream/eventstreamapi
+# github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.21
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/internal/configsources
+# github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.21
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/internal/endpoints/v2
+# github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.21
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/internal/v4a
+github.com/aws/aws-sdk-go-v2/internal/v4a/internal/crypto
+github.com/aws/aws-sdk-go-v2/internal/v4a/internal/v4
+# github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.0
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding
+# github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.4.2
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/service/internal/checksum
+# github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.2
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/service/internal/presigned-url
+# github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.2
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/service/internal/s3shared
+github.com/aws/aws-sdk-go-v2/service/internal/s3shared/arn
+github.com/aws/aws-sdk-go-v2/service/internal/s3shared/config
+# github.com/aws/aws-sdk-go-v2/service/s3 v1.65.3
+## explicit; go 1.21
+github.com/aws/aws-sdk-go-v2/service/s3
+github.com/aws/aws-sdk-go-v2/service/s3/internal/arn
+github.com/aws/aws-sdk-go-v2/service/s3/internal/customizations
+github.com/aws/aws-sdk-go-v2/service/s3/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/s3/types
+# github.com/aws/smithy-go v1.22.0
+## explicit; go 1.21
+github.com/aws/smithy-go
+github.com/aws/smithy-go/auth
+github.com/aws/smithy-go/auth/bearer
+github.com/aws/smithy-go/container/private/cache
+github.com/aws/smithy-go/container/private/cache/lru
+github.com/aws/smithy-go/context
+github.com/aws/smithy-go/document
+github.com/aws/smithy-go/encoding
+github.com/aws/smithy-go/encoding/httpbinding
+github.com/aws/smithy-go/encoding/xml
+github.com/aws/smithy-go/endpoints
+github.com/aws/smithy-go/endpoints/private/rulesfn
+github.com/aws/smithy-go/internal/sync/singleflight
+github.com/aws/smithy-go/io
+github.com/aws/smithy-go/logging
+github.com/aws/smithy-go/metrics
+github.com/aws/smithy-go/middleware
+github.com/aws/smithy-go/ptr
+github.com/aws/smithy-go/rand
+github.com/aws/smithy-go/sync
+github.com/aws/smithy-go/time
+github.com/aws/smithy-go/tracing
+github.com/aws/smithy-go/transport/http
+github.com/aws/smithy-go/transport/http/internal/io
+github.com/aws/smithy-go/waiter
 # github.com/bufbuild/buf v1.45.0
 ## explicit; go 1.22.0
 github.com/bufbuild/buf/cmd/buf
@@ -584,9 +670,6 @@ github.com/gogo/protobuf/proto
 # github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 ## explicit
 github.com/golang/groupcache/lru
-# github.com/golang/snappy v0.0.4
-## explicit
-github.com/golang/snappy
 # github.com/google/cel-go v0.21.0
 ## explicit; go 1.18
 github.com/google/cel-go/cel
@@ -792,9 +875,6 @@ github.com/moby/sys/userns
 ## explicit; go 1.18
 github.com/moby/term
 github.com/moby/term/windows
-# github.com/montanaflynn/stats v0.7.1
-## explicit; go 1.13
-github.com/montanaflynn/stats
 # github.com/morikuni/aec v1.0.0
 ## explicit
 github.com/morikuni/aec
@@ -988,18 +1068,6 @@ github.com/tetratelabs/wazero/sys
 github.com/vbatts/tar-split/archive/tar
 github.com/vbatts/tar-split/tar/asm
 github.com/vbatts/tar-split/tar/storage
-# github.com/xdg-go/pbkdf2 v1.0.0
-## explicit; go 1.9
-github.com/xdg-go/pbkdf2
-# github.com/xdg-go/scram v1.1.2
-## explicit; go 1.11
-github.com/xdg-go/scram
-# github.com/xdg-go/stringprep v1.0.4
-## explicit; go 1.11
-github.com/xdg-go/stringprep
-# github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78
-## explicit; go 1.17
-github.com/youmark/pkcs8
 # go.lsp.dev/jsonrpc2 v0.10.0
 ## explicit; go 1.17
 go.lsp.dev/jsonrpc2
@@ -1012,55 +1080,6 @@ go.lsp.dev/protocol
 # go.lsp.dev/uri v0.3.0
 ## explicit; go 1.13
 go.lsp.dev/uri
-# go.mongodb.org/mongo-driver v1.17.1
-## explicit; go 1.18
-go.mongodb.org/mongo-driver/bson
-go.mongodb.org/mongo-driver/bson/bsoncodec
-go.mongodb.org/mongo-driver/bson/bsonoptions
-go.mongodb.org/mongo-driver/bson/bsonrw
-go.mongodb.org/mongo-driver/bson/bsontype
-go.mongodb.org/mongo-driver/bson/primitive
-go.mongodb.org/mongo-driver/event
-go.mongodb.org/mongo-driver/internal/aws
-go.mongodb.org/mongo-driver/internal/aws/awserr
-go.mongodb.org/mongo-driver/internal/aws/credentials
-go.mongodb.org/mongo-driver/internal/aws/signer/v4
-go.mongodb.org/mongo-driver/internal/bsonutil
-go.mongodb.org/mongo-driver/internal/codecutil
-go.mongodb.org/mongo-driver/internal/credproviders
-go.mongodb.org/mongo-driver/internal/csfle
-go.mongodb.org/mongo-driver/internal/csot
-go.mongodb.org/mongo-driver/internal/driverutil
-go.mongodb.org/mongo-driver/internal/handshake
-go.mongodb.org/mongo-driver/internal/httputil
-go.mongodb.org/mongo-driver/internal/logger
-go.mongodb.org/mongo-driver/internal/ptrutil
-go.mongodb.org/mongo-driver/internal/rand
-go.mongodb.org/mongo-driver/internal/randutil
-go.mongodb.org/mongo-driver/internal/uuid
-go.mongodb.org/mongo-driver/mongo
-go.mongodb.org/mongo-driver/mongo/address
-go.mongodb.org/mongo-driver/mongo/description
-go.mongodb.org/mongo-driver/mongo/options
-go.mongodb.org/mongo-driver/mongo/readconcern
-go.mongodb.org/mongo-driver/mongo/readpref
-go.mongodb.org/mongo-driver/mongo/writeconcern
-go.mongodb.org/mongo-driver/tag
-go.mongodb.org/mongo-driver/version
-go.mongodb.org/mongo-driver/x/bsonx/bsoncore
-go.mongodb.org/mongo-driver/x/mongo/driver
-go.mongodb.org/mongo-driver/x/mongo/driver/auth
-go.mongodb.org/mongo-driver/x/mongo/driver/auth/creds
-go.mongodb.org/mongo-driver/x/mongo/driver/auth/internal/gssapi
-go.mongodb.org/mongo-driver/x/mongo/driver/connstring
-go.mongodb.org/mongo-driver/x/mongo/driver/dns
-go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt
-go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt/options
-go.mongodb.org/mongo-driver/x/mongo/driver/ocsp
-go.mongodb.org/mongo-driver/x/mongo/driver/operation
-go.mongodb.org/mongo-driver/x/mongo/driver/session
-go.mongodb.org/mongo-driver/x/mongo/driver/topology
-go.mongodb.org/mongo-driver/x/mongo/driver/wiremessage
 # go.opencensus.io v0.24.0
 ## explicit; go 1.13
 go.opencensus.io
@@ -1167,9 +1186,6 @@ golang.org/x/crypto/cryptobyte/asn1
 golang.org/x/crypto/hkdf
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
-golang.org/x/crypto/ocsp
-golang.org/x/crypto/pbkdf2
-golang.org/x/crypto/scrypt
 golang.org/x/crypto/sha3
 # golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6
 ## explicit; go 1.22.0
@@ -1216,7 +1232,6 @@ golang.org/x/oauth2/jwt
 ## explicit; go 1.18
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-golang.org/x/sync/singleflight
 # golang.org/x/sys v0.26.0
 ## explicit; go 1.18
 golang.org/x/sys/cpu

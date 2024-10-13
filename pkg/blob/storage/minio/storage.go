@@ -30,9 +30,9 @@ type StorageOptions struct {
 	Address      string
 	AccessKey    string
 	SecretKey    string
-	Secure       bool
 	Bucket       string
 	ObjectPrefix string
+	Secure       bool
 }
 
 func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {

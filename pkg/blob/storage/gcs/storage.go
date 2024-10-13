@@ -29,7 +29,9 @@ type Storage struct {
 }
 
 type StorageOptions struct {
-	URI string
+	URI         string
+	Bucket      string
+	ObjectPefix string
 }
 
 func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {

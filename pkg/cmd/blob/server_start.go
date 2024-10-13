@@ -26,7 +26,6 @@ import (
 	"github.com/cmgsj/blob/pkg/blob/storage/gcs"
 	"github.com/cmgsj/blob/pkg/blob/storage/memory"
 	"github.com/cmgsj/blob/pkg/blob/storage/minio"
-	"github.com/cmgsj/blob/pkg/blob/storage/mongodb"
 	"github.com/cmgsj/blob/pkg/blob/storage/s3"
 	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/docs"
@@ -108,22 +107,20 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 	}
 
 	cmd.Flags().String("gcs-uri", "", "gcs uri")
+	cmd.Flags().String("gcs-bucket", "", "gcs bucket")
+	cmd.Flags().String("gcs-object-prefix", "", "gcs object prefix")
 
-	cmd.Flags().String("s3-address", "", "s3 address")
 	cmd.Flags().String("s3-access-key", "", "s3 access key")
 	cmd.Flags().String("s3-secret-key", "", "s3 secret key")
-	cmd.Flags().Bool("s3-secure", false, "s3 secure")
 	cmd.Flags().String("s3-bucket", "", "s3 bucket")
 	cmd.Flags().String("s3-object-prefix", "", "s3 object prefix")
 
 	cmd.Flags().String("minio-address", "", "minio address")
 	cmd.Flags().String("minio-access-key", "", "minio access key")
 	cmd.Flags().String("minio-secret-key", "", "minio secret key")
-	cmd.Flags().Bool("minio-secure", false, "minio secure")
 	cmd.Flags().String("minio-bucket", "", "minio bucket")
 	cmd.Flags().String("minio-object-prefix", "", "minio object prefix")
-
-	cmd.Flags().String("mongodb-uri", "", "mongodb uri")
+	cmd.Flags().Bool("minio-secure", false, "minio secure")
 
 	viper.BindPFlags(cmd.Flags())
 
@@ -135,7 +132,6 @@ func newBlobStorage(ctx context.Context) (storage.Storage, error) {
 		"gcs",
 		"s3",
 		"minio",
-		"mongodb",
 	}
 
 	storageTypeSet := make(map[string]struct{})
@@ -175,10 +171,8 @@ func newBlobStorage(ctx context.Context) (storage.Storage, error) {
 
 	case "s3":
 		storage, err = s3.NewStorage(ctx, s3.StorageOptions{
-			Address:      viper.GetString("s3-address"),
 			AccessKey:    viper.GetString("s3-access-key"),
 			SecretKey:    viper.GetString("s3-secret-key"),
-			Secure:       viper.GetBool("s3-secure"),
 			Bucket:       viper.GetString("s3-bucket"),
 			ObjectPrefix: viper.GetString("s3-object-prefix"),
 		})
@@ -188,14 +182,9 @@ func newBlobStorage(ctx context.Context) (storage.Storage, error) {
 			Address:      viper.GetString("minio-address"),
 			AccessKey:    viper.GetString("minio-access-key"),
 			SecretKey:    viper.GetString("minio-secret-key"),
-			Secure:       viper.GetBool("minio-secure"),
 			Bucket:       viper.GetString("minio-bucket"),
 			ObjectPrefix: viper.GetString("minio-object-prefix"),
-		})
-
-	case "mongodb":
-		storage, err = mongodb.NewStorage(ctx, mongodb.StorageOptions{
-			URI: viper.GetString("mongodb-uri"),
+			Secure:       viper.GetBool("minio-secure"),
 		})
 
 	default:
