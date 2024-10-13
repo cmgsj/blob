@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"net/url"
 
 	"github.com/cmgsj/go-lib/swagger"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -19,8 +18,11 @@ import (
 	reflectionv1 "google.golang.org/grpc/reflection/grpc_reflection_v1"
 	reflectionv1alpha "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 
-	"github.com/cmgsj/blob/pkg/blob"
+	blobserver "github.com/cmgsj/blob/pkg/blob/server"
 	"github.com/cmgsj/blob/pkg/blob/storage"
+	"github.com/cmgsj/blob/pkg/blob/storage/googlecloud"
+	"github.com/cmgsj/blob/pkg/blob/storage/memory"
+	"github.com/cmgsj/blob/pkg/blob/storage/mongodb"
 	"github.com/cmgsj/blob/pkg/cli"
 	"github.com/cmgsj/blob/pkg/docs"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
@@ -44,7 +46,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			blobServer := blob.NewServer(blobStorage)
+			blobServer := blobserver.NewServer(blobStorage)
 
 			healthServer := health.NewServer()
 			healthServer.SetServingStatus(blobv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
@@ -111,23 +113,18 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 	return cmd
 }
 
-func parseBlobStorage(ctx context.Context, uri string) (blob.Storage, error) {
-	if uri == ":memory:" {
-		return storage.NewInMemoryStorage(), nil
+func parseBlobStorage(ctx context.Context, uri string) (storage.Storage, error) {
+	if memory.IsStorage(uri) {
+		return memory.NewStorage(), nil
 	}
 
-	u, err := url.Parse(uri)
-	if err != nil {
-		return nil, err
+	if googlecloud.IsStorage(uri) {
+		return googlecloud.NewStorage(ctx, uri)
 	}
 
-	switch u.Scheme {
-	case "gs":
-		return storage.NewGoogleCloudStorage(ctx, uri)
-
-	case "mongodb", "mongodb+srv":
-		return storage.NewMongoDBStorage(ctx, uri)
+	if mongodb.IsStorage(uri) {
+		return mongodb.NewStorage(ctx, uri)
 	}
 
-	return nil, fmt.Errorf("unknown storage %q", uri)
+	return nil, fmt.Errorf("unknown blob storage %q", uri)
 }

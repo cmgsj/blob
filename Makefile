@@ -4,7 +4,7 @@ MODULE := $$(go list -m)
 VERSION := 1.0.0
 
 .PHONY: default
-default: fmt build install
+default: fmt install
 
 .PHONY: fmt
 fmt:

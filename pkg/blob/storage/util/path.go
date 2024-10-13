@@ -1,12 +1,12 @@
-package storage
+package util
 
 import "strings"
 
-func cleanBlobPrefix(path string) string {
+func BlobNamePrefix(path string) string {
 	return strings.Trim(path, "/")
 }
 
-func joinBlobPrefix(elems ...string) string {
+func JoinBlobPath(elems ...string) string {
 	var path []string
 
 	for _, elem := range elems {
@@ -16,5 +16,6 @@ func joinBlobPrefix(elems ...string) string {
 			path = append(path, elem)
 		}
 	}
+
 	return strings.Join(path, "/")
 }

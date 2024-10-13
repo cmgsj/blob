@@ -30,7 +30,7 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 			if file == "" || file == "-" {
 				content, err = io.ReadAll(os.Stdin)
 			} else {
-				content, err = os.ReadFile(defaultFile)
+				content, err = os.ReadFile(file)
 			}
 			if err != nil {
 				return err
