@@ -106,6 +106,8 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 
 	cmd.Flags().String("storage", defaultStorage, "blob storage url")
 
+	viper.BindPFlags(cmd.Flags())
+
 	return cmd
 }
 

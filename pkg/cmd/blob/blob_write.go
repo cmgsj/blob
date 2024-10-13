@@ -51,5 +51,7 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 
 	cmd.Flags().StringP("file", "f", defaultFile, "input file")
 
+	viper.BindPFlags(cmd.Flags())
+
 	return cmd
 }

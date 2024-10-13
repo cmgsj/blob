@@ -49,5 +49,7 @@ func NewCmdServerHealth(c *cli.Config) *cobra.Command {
 
 	cmd.Flags().String("service", defaultService, "grpc service")
 
+	viper.BindPFlags(cmd.Flags())
+
 	return cmd
 }
