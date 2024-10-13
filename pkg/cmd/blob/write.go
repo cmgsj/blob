@@ -12,8 +12,6 @@ import (
 )
 
 func NewCmdWrite(c *cli.Config) *cobra.Command {
-	defaultFile := ""
-
 	cmd := &cobra.Command{
 		Use:   "write",
 		Short: "write blob",
@@ -49,7 +47,7 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("file", "f", defaultFile, "input file")
+	cmd.Flags().StringP("file", "f", "", "input file")
 
 	viper.BindPFlags(cmd.Flags())
 

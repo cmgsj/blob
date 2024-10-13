@@ -20,7 +20,7 @@ import (
 
 	blobserver "github.com/cmgsj/blob/pkg/blob/server"
 	"github.com/cmgsj/blob/pkg/blob/storage"
-	"github.com/cmgsj/blob/pkg/blob/storage/googlecloud"
+	"github.com/cmgsj/blob/pkg/blob/storage/gcs"
 	"github.com/cmgsj/blob/pkg/blob/storage/memory"
 	"github.com/cmgsj/blob/pkg/blob/storage/minio"
 	"github.com/cmgsj/blob/pkg/blob/storage/mongodb"
@@ -31,8 +31,6 @@ import (
 )
 
 func NewCmdServerStart(c *cli.Config) *cobra.Command {
-	defaultStorage := ":memory:"
-
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "start blob server",
@@ -40,9 +38,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			storage := viper.GetString("storage")
-
-			blobStorage, err := parseBlobStorage(ctx, storage)
+			blobStorage, err := newBlobStorage(ctx)
 			if err != nil {
 				return err
 			}
@@ -107,29 +103,51 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("storage", defaultStorage, "blob storage url")
+	cmd.Flags().String("storage", "memory", "blob storage type")
+
+	cmd.Flags().String("gcs-uri", "", "gcs uri")
+
+	cmd.Flags().String("minio-address", "", "minio address")
+	cmd.Flags().String("minio-access-key", "", "minio access key")
+	cmd.Flags().String("minio-secret-key", "", "minio secret key")
+	cmd.Flags().Bool("minio-secure", false, "minio secure")
+	cmd.Flags().String("minio-bucket", "", "minio bucket")
+	cmd.Flags().String("minio-object-prefix", "", "minio object prefix")
+
+	cmd.Flags().String("mongodb-uri", "", "mongodb uri")
 
 	viper.BindPFlags(cmd.Flags())
 
 	return cmd
 }
 
-func parseBlobStorage(ctx context.Context, uri string) (storage.Storage, error) {
-	if memory.IsStorage(uri) {
+func newBlobStorage(ctx context.Context) (storage.Storage, error) {
+	storage := viper.GetString("storage")
+
+	switch storage {
+	case "memory":
 		return memory.NewStorage(), nil
+
+	case "gcs":
+		return gcs.NewStorage(ctx, gcs.StorageOptions{
+			URI: viper.GetString("gcs-uri"),
+		})
+
+	case "mongodb":
+		return mongodb.NewStorage(ctx, mongodb.StorageOptions{
+			URI: viper.GetString("mongodb-uri"),
+		})
+
+	case "minio":
+		return minio.NewStorage(ctx, minio.StorageOptions{
+			Address:      viper.GetString("minio-address"),
+			AccessKey:    viper.GetString("minio-access-key"),
+			SecretKey:    viper.GetString("minio-secret-key"),
+			Secure:       viper.GetBool("minio-secure"),
+			Bucket:       viper.GetString("minio-bucket"),
+			ObjectPrefix: viper.GetString("minio-object-prefix"),
+		})
 	}
 
-	if googlecloud.IsStorage(uri) {
-		return googlecloud.NewStorage(ctx, uri)
-	}
-
-	if minio.IsStorage(uri) {
-		return minio.NewStorage(ctx, uri, nil)
-	}
-
-	if mongodb.IsStorage(uri) {
-		return mongodb.NewStorage(ctx, uri)
-	}
-
-	return nil, fmt.Errorf("unknown blob storage %q", uri)
+	return nil, fmt.Errorf("unknown blob storage %q", storage)
 }

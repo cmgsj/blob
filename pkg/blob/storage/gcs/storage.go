@@ -1,4 +1,4 @@
-package googlecloud
+package gcs
 
 import (
 	"context"
@@ -18,56 +18,61 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-const BlobStorageFolder = "blobs"
+const ObjectPrefix = "blobs"
 
 var _ storage.Storage = (*Storage)(nil)
 
 type Storage struct {
-	gcsClient  *gcs.Client
-	bucketName string
-	folder     string
+	gcsClient    *gcs.Client
+	bucket       string
+	objectPrefix string
 }
 
-func NewStorage(ctx context.Context, uri string, opts ...option.ClientOption) (*Storage, error) {
-	u, err := url.Parse(uri)
+type StorageOptions struct {
+	URI string
+}
+
+func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
+	u, err := url.Parse(opts.URI)
 	if err != nil {
 		return nil, err
 	}
 
 	if u.Host == "" {
-		return nil, fmt.Errorf("invalid google cloud storage uri %q: host is required", uri)
+		return nil, fmt.Errorf("invalid google cloud storage uri %q: host is required", opts.URI)
 	}
 
 	var bucketName string
-	var bucketPrefix string
+	var objectPrefix string
+	var clientOpts []option.ClientOption
 
 	switch u.Scheme {
 	case "gs":
 		bucketName = u.Host
-		bucketPrefix = u.Path
+		objectPrefix = u.Path
 
 	case "http", "https":
 		path := strings.Split(strings.Trim(u.Path, "/"), "/")
 
 		if len(path) < 3 {
-			return nil, fmt.Errorf("invalid google cloud storage uri %q: bucket is required", uri)
+			return nil, fmt.Errorf("invalid google cloud storage uri %q: bucket is required", opts.URI)
 		}
 
 		bucketName = path[2]
 
 		if len(path) > 3 {
-			bucketPrefix = strings.Join(path[3:], "/")
+			objectPrefix = strings.Join(path[3:], "/")
 		}
 
 		endpoint := fmt.Sprintf("%s://%s/%s/%s/", u.Scheme, u.Host, path[0], path[1])
 
-		opts = append(opts, option.WithEndpoint(endpoint))
+		clientOpts = append(clientOpts, option.WithEndpoint(endpoint))
 
 	default:
-		return nil, fmt.Errorf("invalid google cloud storage uri %q: unknown scheme", uri)
+		return nil, fmt.Errorf("invalid google cloud storage uri %q: unknown scheme", opts.URI)
 	}
 
-	gcsClient, err := gcs.NewClient(ctx, opts...)
+	gcsClient, err := gcs.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,23 +82,23 @@ func NewStorage(ctx context.Context, uri string, opts ...option.ClientOption) (*
 		return nil, err
 	}
 
-	folder := BlobStorageFolder
-
-	if bucketPrefix != "" {
-		folder = util.BlobPath(bucketPrefix, folder)
+	if objectPrefix == "" {
+		objectPrefix = ObjectPrefix
+	} else {
+		objectPrefix = util.BlobPath(objectPrefix, ObjectPrefix)
 	}
 
 	return &Storage{
-		gcsClient:  gcsClient,
-		bucketName: bucketName,
-		folder:     folder,
+		gcsClient:    gcsClient,
+		bucket:       bucketName,
+		objectPrefix: objectPrefix,
 	}, nil
 }
 
 func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
-	path = util.BlobPath(s.folder, path)
+	path = util.BlobPath(s.objectPrefix, path)
 
-	it := s.gcsClient.Bucket(s.bucketName).Objects(ctx, &gcs.Query{
+	it := s.gcsClient.Bucket(s.bucket).Objects(ctx, &gcs.Query{
 		Prefix: path,
 	})
 
@@ -108,7 +113,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 			return nil, err
 		}
 
-		blobNames = append(blobNames, util.BlobPath(strings.TrimPrefix(attrs.Name, s.folder)))
+		blobNames = append(blobNames, util.BlobPath(strings.TrimPrefix(attrs.Name, s.objectPrefix)))
 	}
 
 	slices.Sort(blobNames)
@@ -117,9 +122,9 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 }
 
 func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
-	path := util.BlobPath(s.folder, name)
+	path := util.BlobPath(s.objectPrefix, name)
 
-	reader, err := s.gcsClient.Bucket(s.bucketName).Object(path).NewReader(ctx)
+	reader, err := s.gcsClient.Bucket(s.bucket).Object(path).NewReader(ctx)
 	if err != nil {
 		if errors.Is(err, gcs.ErrObjectNotExist) {
 			return nil, storage.ErrBlobNotFound
@@ -138,7 +143,7 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 		return nil, err
 	}
 
-	attrs, err := s.gcsClient.Bucket(s.bucketName).Object(path).Attrs(ctx)
+	attrs, err := s.gcsClient.Bucket(s.bucket).Object(path).Attrs(ctx)
 	if err != nil {
 		if errors.Is(err, gcs.ErrObjectNotExist) {
 			return nil, storage.ErrBlobNotFound
@@ -155,9 +160,9 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 }
 
 func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) error {
-	path := util.BlobPath(s.folder, name)
+	path := util.BlobPath(s.objectPrefix, name)
 
-	writer := s.gcsClient.Bucket(s.bucketName).Object(path).NewWriter(ctx)
+	writer := s.gcsClient.Bucket(s.bucket).Object(path).NewWriter(ctx)
 
 	_, err := writer.Write(content)
 	if err != nil {
@@ -173,9 +178,9 @@ func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) er
 }
 
 func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
-	path := util.BlobPath(s.folder, name)
+	path := util.BlobPath(s.objectPrefix, name)
 
-	err := s.gcsClient.Bucket(s.bucketName).Object(path).Delete(ctx)
+	err := s.gcsClient.Bucket(s.bucket).Object(path).Delete(ctx)
 	if err != nil {
 		if errors.Is(err, gcs.ErrObjectNotExist) {
 			return storage.ErrBlobNotFound
@@ -185,18 +190,4 @@ func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
 	}
 
 	return nil
-}
-
-func IsStorage(uri string) bool {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return false
-	}
-
-	switch u.Scheme {
-	case "gs", "http", "https":
-		return true
-	}
-
-	return false
 }

@@ -71,12 +71,3 @@ func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
 
 	return nil
 }
-
-func IsStorage(uri string) bool {
-	switch uri {
-	case ":memory:":
-		return true
-	}
-
-	return false
-}

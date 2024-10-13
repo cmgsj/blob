@@ -1,8 +1,31 @@
 services:
-  mongo:
-    container_name: mongo
+  gcs:
+    container_name: gcs
+    image: fsouza/fake-gcs-server
+    command: --scheme=http
+    ports:
+      - 4443:4443
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./data/gcs:/data
+
+  minio:
+    container_name: minio
+    image: quay.io/minio/minio
+    command: server /data --console-address=':9001'
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=password
+      - MINIO_DEFAULT_BUCKETS=cmgsj
+
+  mongodb:
+    container_name: mongodb
     image: mongo
-    restart: always
     ports:
       - 27017:27017
     environment:

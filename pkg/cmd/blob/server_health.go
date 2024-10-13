@@ -12,8 +12,6 @@ import (
 )
 
 func NewCmdServerHealth(c *cli.Config) *cobra.Command {
-	defaultService := blobv1.BlobService_ServiceDesc.ServiceName
-
 	cmd := &cobra.Command{
 		Use:   "health",
 		Short: "health-check blob server",
@@ -47,7 +45,7 @@ func NewCmdServerHealth(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("service", defaultService, "grpc service")
+	cmd.Flags().String("service", blobv1.BlobService_ServiceDesc.ServiceName, "grpc service")
 
 	viper.BindPFlags(cmd.Flags())
 

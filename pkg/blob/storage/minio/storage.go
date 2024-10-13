@@ -5,96 +5,71 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/url"
 	"slices"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"github.com/cmgsj/blob/pkg/blob/storage"
 	"github.com/cmgsj/blob/pkg/blob/storage/util"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-const BlobStorageFolder = "blobs"
+const ObjectPrefix = "blobs"
 
 var _ storage.Storage = (*Storage)(nil)
 
 type Storage struct {
-	minioClient *minio.Client
-	bucketName  string
-	folder      string
+	minioClient  *minio.Client
+	bucket       string
+	objectPrefix string
 }
 
-func NewStorage(ctx context.Context, uri string, opts *minio.Options) (*Storage, error) {
-	if opts == nil {
-		opts = &minio.Options{}
-	}
+type StorageOptions struct {
+	Address      string
+	AccessKey    string
+	SecretKey    string
+	Secure       bool
+	Bucket       string
+	ObjectPrefix string
+}
 
-	u, err := url.Parse(uri)
+func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
+	minioClient, err := minio.New(opts.Address, &minio.Options{
+		Creds:  credentials.NewStatic(opts.AccessKey, opts.SecretKey, "", credentials.SignatureDefault),
+		Secure: opts.Secure,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	if u.Host == "" {
-		return nil, fmt.Errorf("invalid minio uri %q: host is required", uri)
-	}
-
-	var endpoint string
-	var bucketName string
-	var bucketPrefix string
-
-	switch u.Scheme {
-	case "minio":
-		path := strings.Split(strings.Trim(u.Path, "/"), "/")
-
-		if len(path) < 1 {
-			return nil, fmt.Errorf("invalid minio uri %q: bucket is required", uri)
-		}
-
-		bucketName = path[0]
-
-		if len(path) > 1 {
-			bucketPrefix = strings.Join(path[1:], "/")
-		}
-
-		endpoint = u.Host
-
-	default:
-		return nil, fmt.Errorf("invalid minio uri %q: unknown scheme", uri)
-	}
-
-	minioClient, err := minio.New(endpoint, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	exists, err := minioClient.BucketExists(ctx, bucketName)
+	exists, err := minioClient.BucketExists(ctx, opts.Bucket)
 	if err != nil {
 		return nil, err
 	}
 
 	if !exists {
-		return nil, fmt.Errorf("invalid minio uri %q: bucket does not exist", uri)
+		return nil, fmt.Errorf("minio bucket %q does not exist", opts.Bucket)
 	}
 
-	folder := BlobStorageFolder
-
-	if bucketPrefix != "" {
-		folder = util.BlobPath(bucketPrefix, folder)
+	if opts.ObjectPrefix == "" {
+		opts.ObjectPrefix = ObjectPrefix
+	} else {
+		opts.ObjectPrefix = util.BlobPath(opts.ObjectPrefix, ObjectPrefix)
 	}
 
 	return &Storage{
-		minioClient: minioClient,
-		bucketName:  bucketName,
-		folder:      folder,
+		minioClient:  minioClient,
+		bucket:       opts.Bucket,
+		objectPrefix: opts.ObjectPrefix,
 	}, nil
 }
 
 func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
-	path = util.BlobPath(s.folder, path)
+	path = util.BlobPath(s.objectPrefix, path)
 
-	objects := s.minioClient.ListObjects(ctx, s.bucketName, minio.ListObjectsOptions{
+	objects := s.minioClient.ListObjects(ctx, s.bucket, minio.ListObjectsOptions{
 		Prefix:    path,
 		Recursive: true,
 	})
@@ -102,7 +77,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 	var blobNames []string
 
 	for object := range objects {
-		blobNames = append(blobNames, util.BlobPath(strings.TrimPrefix(object.Key, s.folder)))
+		blobNames = append(blobNames, util.BlobPath(strings.TrimPrefix(object.Key, s.objectPrefix)))
 	}
 
 	slices.Sort(blobNames)
@@ -111,19 +86,15 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 }
 
 func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
-	path := util.BlobPath(s.folder, name)
+	path := util.BlobPath(s.objectPrefix, name)
 
-	object, err := s.minioClient.GetObject(ctx, s.bucketName, path, minio.GetObjectOptions{})
+	object, err := s.minioClient.GetObject(ctx, s.bucket, path, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
+	defer object.Close()
 
 	content, err := io.ReadAll(object)
-	if err != nil {
-		return nil, err
-	}
-
-	err = object.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -141,9 +112,9 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 }
 
 func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) error {
-	path := util.BlobPath(s.folder, name)
+	path := util.BlobPath(s.objectPrefix, name)
 
-	_, err := s.minioClient.PutObject(ctx, s.bucketName, path, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+	_, err := s.minioClient.PutObject(ctx, s.bucket, path, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 	if err != nil {
 		return err
 	}
@@ -152,26 +123,12 @@ func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) er
 }
 
 func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
-	path := util.BlobPath(s.folder, name)
+	path := util.BlobPath(s.objectPrefix, name)
 
-	err := s.minioClient.RemoveObject(ctx, s.bucketName, path, minio.RemoveObjectOptions{})
+	err := s.minioClient.RemoveObject(ctx, s.bucket, path, minio.RemoveObjectOptions{})
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func IsStorage(uri string) bool {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return false
-	}
-
-	switch u.Scheme {
-	case "minio":
-		return true
-	}
-
-	return false
 }

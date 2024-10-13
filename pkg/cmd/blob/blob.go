@@ -12,9 +12,6 @@ import (
 var version = "dev"
 
 func NewCmdBlob() *cobra.Command {
-	defaultGRPCAddress := "127.0.0.1:9090"
-	defaultHTTPAddress := "127.0.0.1:8080"
-
 	cmd := &cobra.Command{
 		Use:   "blob",
 		Short: "blob CLI",
@@ -26,8 +23,8 @@ func NewCmdBlob() *cobra.Command {
 		Version:       version,
 	}
 
-	cmd.PersistentFlags().String("grpc-address", defaultGRPCAddress, "blob server grpc address")
-	cmd.PersistentFlags().String("http-address", defaultHTTPAddress, "blob server http address")
+	cmd.PersistentFlags().String("grpc-address", "127.0.0.1:9090", "blob server grpc address")
+	cmd.PersistentFlags().String("http-address", "127.0.0.1:8080", "blob server http address")
 
 	viper.AutomaticEnv()
 	viper.AllowEmptyEnv(true)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
 	"slices"
 	"time"
 
@@ -18,27 +17,31 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-const BlobStorageCollection = "blobs"
+const Collection = "blobs"
 
 var _ storage.Storage = (*Storage)(nil)
 
 type Storage struct {
-	mongoClient    *mongo.Client
-	databaseName   string
-	collectionName string
+	mongoClient *mongo.Client
+	database    string
+	collection  string
 }
 
-func NewStorage(ctx context.Context, uri string, opts ...*options.ClientOptions) (*Storage, error) {
-	cs, err := connstring.ParseAndValidate(uri)
+type StorageOptions struct {
+	URI string
+}
+
+func NewStorage(ctx context.Context, opts StorageOptions) (*Storage, error) {
+	cs, err := connstring.ParseAndValidate(opts.URI)
 	if err != nil {
 		return nil, err
 	}
 
 	if cs.Database == "" {
-		return nil, fmt.Errorf("invalid mongodb uri %q: database is required", uri)
+		return nil, fmt.Errorf("invalid mongodb uri %q: database is required", opts.URI)
 	}
 
-	mongoClient, err := mongo.Connect(ctx, append(opts, options.Client().ApplyURI(uri))...)
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(opts.URI))
 	if err != nil {
 		return nil, err
 	}
@@ -49,16 +52,16 @@ func NewStorage(ctx context.Context, uri string, opts ...*options.ClientOptions)
 	}
 
 	return &Storage{
-		mongoClient:    mongoClient,
-		databaseName:   cs.Database,
-		collectionName: BlobStorageCollection,
+		mongoClient: mongoClient,
+		database:    cs.Database,
+		collection:  Collection,
 	}, nil
 }
 
 func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
 	path = util.BlobPath(path)
 
-	cursor, err := s.mongoClient.Database(s.databaseName).Collection(s.collectionName).Find(ctx, bson.M{
+	cursor, err := s.mongoClient.Database(s.database).Collection(s.collection).Find(ctx, bson.M{
 		"name": bson.M{
 			"$regex": "^" + path,
 		},
@@ -87,7 +90,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 }
 
 func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
-	result := s.mongoClient.Database(s.databaseName).Collection(s.collectionName).FindOne(ctx, bson.M{
+	result := s.mongoClient.Database(s.database).Collection(s.collection).FindOne(ctx, bson.M{
 		"name": name,
 	})
 
@@ -115,7 +118,7 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 }
 
 func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) error {
-	_, err := s.mongoClient.Database(s.databaseName).Collection(s.collectionName).InsertOne(ctx, Blob{
+	_, err := s.mongoClient.Database(s.database).Collection(s.collection).InsertOne(ctx, Blob{
 		Name:      name,
 		Content:   content,
 		UpdatedAt: time.Now().Unix(),
@@ -128,7 +131,7 @@ func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) er
 }
 
 func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
-	result, err := s.mongoClient.Database(s.databaseName).Collection(s.collectionName).DeleteOne(ctx, bson.M{
+	result, err := s.mongoClient.Database(s.database).Collection(s.collection).DeleteOne(ctx, bson.M{
 		"name": name,
 	})
 	if err != nil {
@@ -140,18 +143,4 @@ func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
 	}
 
 	return nil
-}
-
-func IsStorage(uri string) bool {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return false
-	}
-
-	switch u.Scheme {
-	case "mongodb", "mongodb+srv":
-		return true
-	}
-
-	return false
 }
