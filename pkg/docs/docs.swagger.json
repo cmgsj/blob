@@ -6,7 +6,7 @@
   },
   "tags": [
     {
-      "name": "v1.blob",
+      "name": "blob.v1",
       "description": "Blob Service API"
     },
     {
@@ -51,7 +51,7 @@
           }
         ],
         "tags": [
-          "v1.blob"
+          "blob.v1"
         ],
         "security": [
           {
@@ -87,7 +87,7 @@
           }
         ],
         "tags": [
-          "v1.blob"
+          "blob.v1"
         ],
         "security": [
           {
@@ -121,7 +121,7 @@
           }
         ],
         "tags": [
-          "v1.blob"
+          "blob.v1"
         ],
         "security": [
           {
@@ -163,7 +163,7 @@
           }
         ],
         "tags": [
-          "v1.blob"
+          "blob.v1"
         ],
         "security": [
           {
