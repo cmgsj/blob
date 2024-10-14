@@ -15,6 +15,8 @@ fmt:
 
 .PHONY: gen
 gen:
+	@rm -rf pkg/gen
+	@rm -rf pkg/docs/docks.swagger.json
 	@buf format --write && buf generate
 
 .PHONY: test
