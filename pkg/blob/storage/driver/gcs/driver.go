@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	gcs "cloud.google.com/go/storage"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
@@ -18,7 +18,7 @@ import (
 var _ driver.Driver = (*Driver)(nil)
 
 type Driver struct {
-	gcsClient    *gcs.Client
+	gcsClient    *storage.Client
 	bucket       string
 	objectPrefix string
 }
@@ -34,7 +34,7 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 	}
 
 	if u.Host == "" {
-		return nil, fmt.Errorf("invalid google cloud storage uri %q: host is required", opts.URI)
+		return nil, fmt.Errorf("invalid gcs uri %q: host is required", opts.URI)
 	}
 
 	var bucket string
@@ -50,7 +50,7 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		path := strings.Split(strings.Trim(u.Path, "/"), "/")
 
 		if len(path) < 3 {
-			return nil, fmt.Errorf("invalid google cloud storage uri %q: bucket is required", opts.URI)
+			return nil, fmt.Errorf("invalid gcs uri %q: bucket is required", opts.URI)
 		}
 
 		bucket = path[2]
@@ -64,10 +64,10 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		clientOpts = append(clientOpts, option.WithEndpoint(endpoint))
 
 	default:
-		return nil, fmt.Errorf("invalid google cloud storage uri %q: unknown scheme", opts.URI)
+		return nil, fmt.Errorf("invalid gcs uri %q: unknown scheme", opts.URI)
 	}
 
-	gcsClient, err := gcs.NewClient(ctx, clientOpts...)
+	gcsClient, err := storage.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (d *Driver) ObjectPrefix() string {
 func (d *Driver) BucketExists(ctx context.Context, bucket string) (bool, error) {
 	_, err := d.gcsClient.Bucket(bucket).Attrs(ctx)
 	if err != nil {
-		if errors.Is(err, gcs.ErrBucketNotExist) {
+		if errors.Is(err, storage.ErrBucketNotExist) {
 			return false, nil
 		}
 
@@ -100,8 +100,8 @@ func (d *Driver) BucketExists(ctx context.Context, bucket string) (bool, error) 
 	return true, nil
 }
 
-func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
-	it := s.gcsClient.Bucket(s.bucket).Objects(ctx, &gcs.Query{
+func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
+	it := d.gcsClient.Bucket(d.bucket).Objects(ctx, &storage.Query{
 		Prefix: path,
 	})
 
@@ -122,23 +122,19 @@ func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
-	reader, err := s.gcsClient.Bucket(s.bucket).Object(name).NewReader(ctx)
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+	reader, err := d.gcsClient.Bucket(d.bucket).Object(name).NewReader(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
+	defer reader.Close()
 
 	content, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	err = reader.Close()
-	if err != nil {
-		return nil, 0, err
-	}
-
-	attrs, err := s.gcsClient.Bucket(s.bucket).Object(name).Attrs(ctx)
+	attrs, err := d.gcsClient.Bucket(d.bucket).Object(name).Attrs(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -146,8 +142,8 @@ func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, err
 	return content, attrs.Updated.Unix(), nil
 }
 
-func (s *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
-	writer := s.gcsClient.Bucket(s.bucket).Object(name).NewWriter(ctx)
+func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+	writer := d.gcsClient.Bucket(d.bucket).Object(name).NewWriter(ctx)
 
 	_, err := writer.Write(content)
 	if err != nil {
@@ -157,10 +153,10 @@ func (s *Driver) WriteObject(ctx context.Context, name string, content []byte) e
 	return writer.Close()
 }
 
-func (s *Driver) RemoveObject(ctx context.Context, name string) error {
-	return s.gcsClient.Bucket(s.bucket).Object(name).Delete(ctx)
+func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+	return d.gcsClient.Bucket(d.bucket).Object(name).Delete(ctx)
 }
 
 func (d *Driver) IsObjectNotFound(err error) bool {
-	return errors.Is(err, gcs.ErrObjectNotExist)
+	return errors.Is(err, storage.ErrObjectNotExist)
 }

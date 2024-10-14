@@ -24,6 +24,7 @@ import (
 	blobserver "github.com/cmgsj/blob/pkg/blob/server"
 	"github.com/cmgsj/blob/pkg/blob/storage"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver/azblob"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/gcs"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/memory"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/minio"
@@ -112,6 +113,10 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().String("azblob-uri", "", "azblob uri")
+	cmd.Flags().String("azblob-account-name", "", "azblob account name")
+	cmd.Flags().String("azblob-account-key", "", "azblob account key")
+
 	cmd.Flags().String("gcs-uri", "", "gcs uri")
 
 	cmd.Flags().String("s3-uri", "", "s3 uri")
@@ -132,6 +137,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 
 func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
 	driverTypes := []string{
+		"azblob",
 		"gcs",
 		"s3",
 		"minio",
@@ -166,6 +172,13 @@ func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
 	switch driverType {
 	case "memory":
 		driver = memory.NewDriver()
+
+	case "azblob":
+		driver, err = azblob.NewDriver(ctx, azblob.DriverOptions{
+			URI:         viper.GetString("azblob-uri"),
+			AccountName: viper.GetString("azblob-account-name"),
+			AccountKey:  viper.GetString("azblob-account-key"),
+		})
 
 	case "gcs":
 		driver, err = gcs.NewDriver(ctx, gcs.DriverOptions{

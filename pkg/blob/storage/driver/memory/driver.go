@@ -33,10 +33,10 @@ func (d *Driver) BucketExists(ctx context.Context, bucket string) (bool, error) 
 	return true, nil
 }
 
-func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
+func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
 	var objectNames []string
 
-	s.m.Range(func(key, value any) bool {
+	d.m.Range(func(key, value any) bool {
 		name := key.(string)
 
 		if strings.HasPrefix(name, path) {
@@ -49,8 +49,8 @@ func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
-	v, ok := s.m.Load(name)
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+	v, ok := d.m.Load(name)
 	if !ok {
 		return nil, 0, errObjectNotFound
 	}
@@ -60,8 +60,8 @@ func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, err
 	return b.Content, b.UpdatedAt, nil
 }
 
-func (s *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
-	s.m.Store(name, &blobv1.Blob{
+func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+	d.m.Store(name, &blobv1.Blob{
 		Name:      name,
 		Content:   content,
 		UpdatedAt: time.Now().Unix(),
@@ -70,19 +70,19 @@ func (s *Driver) WriteObject(ctx context.Context, name string, content []byte) e
 	return nil
 }
 
-func (s *Driver) RemoveObject(ctx context.Context, name string) error {
-	_, ok := s.m.Load(name)
+func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+	_, ok := d.m.Load(name)
 	if !ok {
 		return errObjectNotFound
 	}
 
-	s.m.Delete(name)
+	d.m.Delete(name)
 
 	return nil
 }
 
 var errObjectNotFound = errors.New("object not found")
 
-func (s *Driver) IsObjectNotFound(err error) bool {
+func (d *Driver) IsObjectNotFound(err error) bool {
 	return errors.Is(err, errObjectNotFound)
 }

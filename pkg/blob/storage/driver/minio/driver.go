@@ -56,8 +56,8 @@ func (d *Driver) BucketExists(ctx context.Context, bucket string) (bool, error) 
 	return d.minioClient.BucketExists(ctx, bucket)
 }
 
-func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
-	objects := s.minioClient.ListObjects(ctx, s.bucket, minio.ListObjectsOptions{
+func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
+	objects := d.minioClient.ListObjects(ctx, d.bucket, minio.ListObjectsOptions{
 		Prefix:    path,
 		Recursive: true,
 	})
@@ -71,8 +71,8 @@ func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
-	object, err := s.minioClient.GetObject(ctx, s.bucket, name, minio.GetObjectOptions{})
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+	object, err := d.minioClient.GetObject(ctx, d.bucket, name, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, 0, err
 	}
@@ -91,13 +91,13 @@ func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, err
 	return content, info.LastModified.Unix(), nil
 }
 
-func (s *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
-	_, err := s.minioClient.PutObject(ctx, s.bucket, name, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+	_, err := d.minioClient.PutObject(ctx, d.bucket, name, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 	return err
 }
 
-func (s *Driver) RemoveObject(ctx context.Context, name string) error {
-	return s.minioClient.RemoveObject(ctx, s.bucket, name, minio.RemoveObjectOptions{})
+func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+	return d.minioClient.RemoveObject(ctx, d.bucket, name, minio.RemoveObjectOptions{})
 }
 
 func (d *Driver) IsObjectNotFound(err error) bool {

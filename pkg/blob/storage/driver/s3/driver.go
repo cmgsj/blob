@@ -37,7 +37,7 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 	}
 
 	if u.Host == "" {
-		return nil, fmt.Errorf("invalid google cloud storage uri %q: host is required", opts.URI)
+		return nil, fmt.Errorf("invalid s3 uri %q: host is required", opts.URI)
 	}
 
 	var bucket string
@@ -53,7 +53,7 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		path := strings.Split(strings.Trim(u.Path, "/"), "/")
 
 		if len(path) < 3 {
-			return nil, fmt.Errorf("invalid google cloud storage uri %q: bucket is required", opts.URI)
+			return nil, fmt.Errorf("invalid s3 uri %q: bucket is required", opts.URI)
 		}
 
 		bucket = path[2]
@@ -65,7 +65,7 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		endpoint = fmt.Sprintf("%s://%s/%s/%s/", u.Scheme, u.Host, path[0], path[1])
 
 	default:
-		return nil, fmt.Errorf("invalid google cloud storage uri %q: unknown scheme", opts.URI)
+		return nil, fmt.Errorf("invalid s3 uri %q: unknown scheme", opts.URI)
 	}
 
 	s3Client := s3.New(s3.Options{
@@ -109,9 +109,9 @@ func (d *Driver) BucketExists(ctx context.Context, bucket string) (bool, error) 
 	return true, nil
 }
 
-func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
-	objects, err := s.s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
-		Bucket: aws.String(s.bucket),
+func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error) {
+	objects, err := d.s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket: aws.String(d.bucket),
 		Prefix: aws.String(path),
 	})
 	if err != nil {
@@ -127,9 +127,9 @@ func (s *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
-	object, err := s.s3Client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(s.bucket),
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+	object, err := d.s3Client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(d.bucket),
 		Key:    aws.String(name),
 	})
 	if err != nil {
@@ -145,18 +145,18 @@ func (s *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, err
 	return content, object.LastModified.Unix(), nil
 }
 
-func (s *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
-	_, err := s.s3Client.PutObject(ctx, &s3.PutObjectInput{
-		Bucket: aws.String(s.bucket),
+func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+	_, err := d.s3Client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket: aws.String(d.bucket),
 		Key:    aws.String(name),
 		Body:   bytes.NewReader(content),
 	})
 	return err
 }
 
-func (s *Driver) RemoveObject(ctx context.Context, name string) error {
-	_, err := s.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
-		Bucket: aws.String(s.bucket),
+func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+	_, err := d.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(d.bucket),
 		Key:    aws.String(name),
 	})
 	return err
