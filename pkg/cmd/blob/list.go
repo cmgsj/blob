@@ -1,6 +1,8 @@
 package blob
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cmgsj/blob/pkg/cli"
@@ -33,11 +35,11 @@ func NewCmdList(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			if len(resp.GetBlobNames()) == 0 {
-				return nil
+			for _, blobName := range resp.GetBlobNames() {
+				fmt.Println(blobName)
 			}
 
-			return c.PrintJSON(resp)
+			return nil
 		},
 	}
 

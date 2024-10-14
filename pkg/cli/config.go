@@ -1,9 +1,6 @@
 package cli
 
 import (
-	"encoding/json"
-	"os"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
@@ -25,14 +22,6 @@ func NewConfig(opts ConfigOptions) *Config {
 	return &Config{
 		opts: opts,
 	}
-}
-
-func (c *Config) PrintJSON(v interface{}) error {
-	encoder := json.NewEncoder(os.Stdout)
-
-	encoder.SetIndent("", " ")
-
-	return encoder.Encode(v)
 }
 
 func (c *Config) GRPCAddress() string {
