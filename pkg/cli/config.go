@@ -33,7 +33,7 @@ func (c *Config) HTTPAddress() string {
 }
 
 func (c *Config) BlobServiceClient() (blobv1.BlobServiceClient, error) {
-	conn, err := c.grpcDial()
+	conn, err := c.grpcClientDial()
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *Config) BlobServiceClient() (blobv1.BlobServiceClient, error) {
 }
 
 func (c *Config) HealthClient() (healthv1.HealthClient, error) {
-	conn, err := c.grpcDial()
+	conn, err := c.grpcClientDial()
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (c *Config) HealthClient() (healthv1.HealthClient, error) {
 	return healthv1.NewHealthClient(conn), nil
 }
 
-func (c *Config) grpcDial() (conn *grpc.ClientConn, err error) {
+func (c *Config) grpcClientDial() (conn *grpc.ClientConn, err error) {
 	logger := interceptors.NewLogger()
 
 	opts := []grpc.DialOption{

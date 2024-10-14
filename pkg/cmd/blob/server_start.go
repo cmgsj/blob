@@ -22,8 +22,8 @@ import (
 	reflectionv1alpha "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 
 	blobserver "github.com/cmgsj/blob/pkg/blob/server"
-	"github.com/cmgsj/blob/pkg/blob/storage"
-	"github.com/cmgsj/blob/pkg/blob/storage/driver"
+	blobstorage "github.com/cmgsj/blob/pkg/blob/storage"
+	blobstorageriver "github.com/cmgsj/blob/pkg/blob/storage/driver"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/azblob"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/gcs"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/memory"
@@ -48,7 +48,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			blobStorage, err := storage.NewStorage(ctx, blobStorageDriver)
+			blobStorage, err := blobstorage.NewStorage(ctx, blobStorageDriver)
 			if err != nil {
 				return err
 			}
@@ -139,7 +139,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 	return cmd
 }
 
-func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
+func newBlobStorageDriver(ctx context.Context) (blobstorageriver.Driver, error) {
 	driverTypes := []string{
 		"azblob",
 		"gcs",
@@ -170,7 +170,7 @@ func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
 
 	driverType := driverTypes[0]
 
-	var driver driver.Driver
+	var driver blobstorageriver.Driver
 	var err error
 
 	switch driverType {
