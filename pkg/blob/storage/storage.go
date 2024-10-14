@@ -78,10 +78,10 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 	}, nil
 }
 
-func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) error {
+func (s *Storage) PutBlob(ctx context.Context, name string, content []byte) error {
 	path := blobPath(s.objectPrefix, name)
 
-	err := s.driver.WriteObject(ctx, path, content)
+	err := s.driver.PutObject(ctx, path, content)
 	if err != nil {
 		return err
 	}
@@ -89,10 +89,10 @@ func (s *Storage) WriteBlob(ctx context.Context, name string, content []byte) er
 	return nil
 }
 
-func (s *Storage) RemoveBlob(ctx context.Context, name string) error {
+func (s *Storage) DeleteBlob(ctx context.Context, name string) error {
 	path := blobPath(s.objectPrefix, name)
 
-	err := s.driver.RemoveObject(ctx, path)
+	err := s.driver.DeleteObject(ctx, path)
 	if err != nil {
 		if s.driver.IsObjectNotFound(err) {
 			return ErrBlobNotFound

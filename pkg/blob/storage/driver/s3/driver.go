@@ -145,7 +145,7 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	return content, nil
 }
 
-func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+func (d *Driver) PutObject(ctx context.Context, name string, content []byte) error {
 	_, err := d.s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(d.bucket),
 		Key:    aws.String(name),
@@ -154,7 +154,7 @@ func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) e
 	return err
 }
 
-func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 	_, err := d.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(d.bucket),
 		Key:    aws.String(name),

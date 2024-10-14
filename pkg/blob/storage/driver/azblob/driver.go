@@ -140,12 +140,12 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	return content, nil
 }
 
-func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+func (d *Driver) PutObject(ctx context.Context, name string, content []byte) error {
 	_, err := d.azblobClient.NewContainerClient(d.bucket).NewBlockBlobClient(name).UploadStream(ctx, bytes.NewReader(content), &blockblob.UploadStreamOptions{})
 	return err
 }
 
-func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 	_, err := d.azblobClient.NewContainerClient(d.bucket).NewBlobClient(name).Delete(ctx, &blob.DeleteOptions{})
 	return err
 }

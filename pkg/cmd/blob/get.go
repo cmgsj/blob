@@ -1,6 +1,10 @@
 package blob
 
 import (
+	"bytes"
+	"io"
+	"os"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cmgsj/blob/pkg/cli"
@@ -29,9 +33,8 @@ func NewCmdGet(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			resp.Blob.Content = nil
-
-			return c.PrintJSON(resp)
+			_, err = io.Copy(os.Stdout, bytes.NewReader(resp.GetBlob().GetContent()))
+			return err
 		},
 	}
 

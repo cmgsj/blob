@@ -137,7 +137,7 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	return content, nil
 }
 
-func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+func (d *Driver) PutObject(ctx context.Context, name string, content []byte) error {
 	writer := d.gcsClient.Bucket(d.bucket).Object(name).NewWriter(ctx)
 
 	_, err := writer.Write(content)
@@ -148,7 +148,7 @@ func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) e
 	return writer.Close()
 }
 
-func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 	return d.gcsClient.Bucket(d.bucket).Object(name).Delete(ctx)
 }
 

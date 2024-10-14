@@ -96,13 +96,13 @@
         ]
       },
       "delete": {
-        "summary": "Remove blob",
-        "operationId": "remove_blob",
+        "summary": "Delete blob",
+        "operationId": "delete_blob",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1RemoveBlobResponse"
+              "$ref": "#/definitions/v1DeleteBlobResponse"
             }
           },
           "default": {
@@ -129,14 +129,14 @@
           }
         ]
       },
-      "post": {
-        "summary": "Write blob",
-        "operationId": "write_blob",
+      "put": {
+        "summary": "Put blob",
+        "operationId": "put_blob",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1WriteBlobResponse"
+              "$ref": "#/definitions/v1PutBlobResponse"
             }
           },
           "default": {
@@ -158,7 +158,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BlobServiceWriteBlobBody"
+              "$ref": "#/definitions/BlobServicePutBlobBody"
             }
           }
         ],
@@ -174,7 +174,7 @@
     }
   },
   "definitions": {
-    "BlobServiceWriteBlobBody": {
+    "BlobServicePutBlobBody": {
       "type": "object",
       "properties": {
         "content": {
@@ -223,6 +223,9 @@
         }
       }
     },
+    "v1DeleteBlobResponse": {
+      "type": "object"
+    },
     "v1GetBlobResponse": {
       "type": "object",
       "properties": {
@@ -242,10 +245,7 @@
         }
       }
     },
-    "v1RemoveBlobResponse": {
-      "type": "object"
-    },
-    "v1WriteBlobResponse": {
+    "v1PutBlobResponse": {
       "type": "object"
     }
   },

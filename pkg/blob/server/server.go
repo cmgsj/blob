@@ -42,20 +42,20 @@ func (s *Server) GetBlob(ctx context.Context, req *blobv1.GetBlobRequest) (*blob
 	}, nil
 }
 
-func (s *Server) WriteBlob(ctx context.Context, req *blobv1.WriteBlobRequest) (*blobv1.WriteBlobResponse, error) {
-	err := s.storage.WriteBlob(ctx, req.GetBlobName(), req.GetContent())
+func (s *Server) PutBlob(ctx context.Context, req *blobv1.PutBlobRequest) (*blobv1.PutBlobResponse, error) {
+	err := s.storage.PutBlob(ctx, req.GetBlobName(), req.GetContent())
 	if err != nil {
 		return nil, storageError(err)
 	}
 
-	return &blobv1.WriteBlobResponse{}, nil
+	return &blobv1.PutBlobResponse{}, nil
 }
 
-func (s *Server) RemoveBlob(ctx context.Context, req *blobv1.RemoveBlobRequest) (*blobv1.RemoveBlobResponse, error) {
-	err := s.storage.RemoveBlob(ctx, req.GetBlobName())
+func (s *Server) DeleteBlob(ctx context.Context, req *blobv1.DeleteBlobRequest) (*blobv1.DeleteBlobResponse, error) {
+	err := s.storage.DeleteBlob(ctx, req.GetBlobName())
 	if err != nil {
 		return nil, storageError(err)
 	}
 
-	return &blobv1.RemoveBlobResponse{}, nil
+	return &blobv1.DeleteBlobResponse{}, nil
 }

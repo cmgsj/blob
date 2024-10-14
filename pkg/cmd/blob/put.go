@@ -11,10 +11,10 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-func NewCmdWrite(c *cli.Config) *cobra.Command {
+func NewCmdPut(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "write",
-		Short: "write blob",
+		Use:   "put",
+		Short: "put blob",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -39,7 +39,7 @@ func NewCmdWrite(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			_, err = blobClient.WriteBlob(ctx, &blobv1.WriteBlobRequest{
+			_, err = blobClient.PutBlob(ctx, &blobv1.PutBlobRequest{
 				BlobName: blobName,
 				Content:  content,
 			})

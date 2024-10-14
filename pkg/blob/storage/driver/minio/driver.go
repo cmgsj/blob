@@ -86,12 +86,12 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	return content, nil
 }
 
-func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+func (d *Driver) PutObject(ctx context.Context, name string, content []byte) error {
 	_, err := d.minioClient.PutObject(ctx, d.bucket, name, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 	return err
 }
 
-func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 	return d.minioClient.RemoveObject(ctx, d.bucket, name, minio.RemoveObjectOptions{})
 }
 

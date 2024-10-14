@@ -56,13 +56,13 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	return v.([]byte), nil
 }
 
-func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
+func (d *Driver) PutObject(ctx context.Context, name string, content []byte) error {
 	d.m.Store(name, content)
 
 	return nil
 }
 
-func (d *Driver) RemoveObject(ctx context.Context, name string) error {
+func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 	_, ok := d.m.Load(name)
 	if !ok {
 		return errObjectNotFound

@@ -57,25 +57,25 @@ service BlobService {
       }
     };
   }
-  rpc WriteBlob(WriteBlobRequest) returns (WriteBlobResponse) {
+  rpc PutBlob(PutBlobRequest) returns (PutBlobResponse) {
     option (google.api.http) = {
-      post: "/api/v1/blob/{blob_name}"
+      put: "/api/v1/blob/{blob_name}"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Write blob"
-      operation_id: "write_blob"
+      summary: "Put blob"
+      operation_id: "put_blob"
       tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
     };
   }
-  rpc RemoveBlob(RemoveBlobRequest) returns (RemoveBlobResponse) {
+  rpc DeleteBlob(DeleteBlobRequest) returns (DeleteBlobResponse) {
     option (google.api.http) = {delete: "/api/v1/blob/{blob_name}"};
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Remove blob"
-      operation_id: "remove_blob"
+      summary: "Delete blob"
+      operation_id: "delete_blob"
       tags: "v1.blob"
       security: {
         security_requirement: {key: "APIKeyAuth"}
@@ -105,15 +105,15 @@ message GetBlobResponse {
   Blob blob = 1;
 }
 
-message WriteBlobRequest {
+message PutBlobRequest {
   string blob_name = 1;
   bytes content = 2;
 }
 
-message WriteBlobResponse {}
+message PutBlobResponse {}
 
-message RemoveBlobRequest {
+message DeleteBlobRequest {
   string blob_name = 1;
 }
 
-message RemoveBlobResponse {}
+message DeleteBlobResponse {}

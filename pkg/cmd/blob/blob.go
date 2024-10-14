@@ -38,12 +38,11 @@ func NewCmdBlob() *cobra.Command {
 	})
 
 	cmd.AddCommand(
+		NewCmdDelete(c),
 		NewCmdGet(c),
 		NewCmdList(c),
-		NewCmdRead(c),
-		NewCmdRemove(c),
+		NewCmdPut(c),
 		NewCmdServer(c),
-		NewCmdWrite(c),
 	)
 
 	return cmd

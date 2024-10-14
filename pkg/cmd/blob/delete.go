@@ -7,10 +7,10 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
-func NewCmdRemove(c *cli.Config) *cobra.Command {
+func NewCmdDelete(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "remove",
-		Short: "remove blob",
+		Use:   "delete",
+		Short: "delete blob",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -22,7 +22,7 @@ func NewCmdRemove(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			_, err = blobClient.RemoveBlob(ctx, &blobv1.RemoveBlobRequest{
+			_, err = blobClient.DeleteBlob(ctx, &blobv1.DeleteBlobRequest{
 				BlobName: blobName,
 			})
 			return err
