@@ -51,4 +51,4 @@ binary: gen
 		flags+=(-o "bin/blob"); \
 	fi; \
 	echo "$${cmd}ing blob@$${version} $$(go env GOOS)/$$(go env GOARCH) cgo=$$(go env CGO_ENABLED)"; \
-	go "$${cmd}" "$${flags[@]}" .
+	go "$${cmd}" "$${flags[@]}" ./cmd/blob
