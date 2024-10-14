@@ -1,16 +1,4 @@
 services:
-  gcs:
-    container_name: gcs
-    image: fsouza/fake-gcs-server
-    command: --scheme=http
-    ports:
-      - 4443:4443
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
-    volumes:
-      - ./data/gcs:/data
-
   minio:
     container_name: minio
     image: minio/minio
@@ -28,4 +16,4 @@ services:
     depends_on:
       - minio
     entrypoint: |
-      /bin/bash -c "sleep 5 && mc config host add local http://minio:9000 root password && (mc rm -r --force local/cmgsj; mc mb local/cmgsj)"
+      /bin/bash -c "sleep 5 && mc config host add local http://minio:9000 root password && (mc rm -r --force local/test; mc mb local/test)"
