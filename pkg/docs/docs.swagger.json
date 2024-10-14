@@ -220,10 +220,6 @@
         "content": {
           "type": "string",
           "format": "byte"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "int64"
         }
       }
     },
@@ -243,10 +239,6 @@
           "items": {
             "type": "string"
           }
-        },
-        "count": {
-          "type": "string",
-          "format": "uint64"
         }
       }
     },

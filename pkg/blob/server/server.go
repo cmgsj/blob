@@ -28,7 +28,6 @@ func (s *Server) ListBlobs(ctx context.Context, req *blobv1.ListBlobsRequest) (*
 
 	return &blobv1.ListBlobsResponse{
 		BlobNames: blobNames,
-		Count:     uint64(len(blobNames)),
 	}, nil
 }
 

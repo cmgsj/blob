@@ -122,24 +122,19 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	reader, err := d.gcsClient.Bucket(d.bucket).Object(name).NewReader(ctx)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer reader.Close()
 
 	content, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	attrs, err := d.gcsClient.Bucket(d.bucket).Object(name).Attrs(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return content, attrs.Updated.Unix(), nil
+	return content, nil
 }
 
 func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {

@@ -5,10 +5,8 @@ import (
 	"errors"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/cmgsj/blob/pkg/blob/storage/driver"
-	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 )
 
 var _ driver.Driver = (*Driver)(nil)
@@ -49,23 +47,17 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	v, ok := d.m.Load(name)
 	if !ok {
-		return nil, 0, errObjectNotFound
+		return nil, errObjectNotFound
 	}
 
-	b := v.(*blobv1.Blob)
-
-	return b.Content, b.UpdatedAt, nil
+	return v.([]byte), nil
 }
 
 func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
-	d.m.Store(name, &blobv1.Blob{
-		Name:      name,
-		Content:   content,
-		UpdatedAt: time.Now().Unix(),
-	})
+	d.m.Store(name, content)
 
 	return nil
 }

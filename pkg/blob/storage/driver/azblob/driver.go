@@ -125,24 +125,19 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
-	stream, err := d.azblobClient.NewContainerClient(d.bucket).NewBlockBlobClient(name).DownloadStream(ctx, &blob.DownloadStreamOptions{})
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
+	resp, err := d.azblobClient.NewContainerClient(d.bucket).NewBlockBlobClient(name).DownloadStream(ctx, &blob.DownloadStreamOptions{})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	defer stream.Body.Close()
+	defer resp.Body.Close()
 
-	content, err := io.ReadAll(stream.Body)
+	content, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, 0, err
-	}
-
-	properties, err := d.azblobClient.NewContainerClient(d.bucket).NewBlobClient(name).GetProperties(ctx, &blob.GetPropertiesOptions{})
-	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	return content, properties.LastModified.Unix(), nil
+	return content, nil
 }
 
 func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {

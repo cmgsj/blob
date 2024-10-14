@@ -63,7 +63,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
 	path := blobPath(s.objectPrefix, name)
 
-	content, updatedAt, err := s.driver.GetObject(ctx, path)
+	content, err := s.driver.GetObject(ctx, path)
 	if err != nil {
 		if s.driver.IsObjectNotFound(err) {
 			return nil, ErrBlobNotFound
@@ -73,9 +73,8 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 	}
 
 	return &blobv1.Blob{
-		Name:      name,
-		Content:   content,
-		UpdatedAt: updatedAt,
+		Name:    name,
+		Content: content,
 	}, nil
 }
 

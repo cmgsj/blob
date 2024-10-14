@@ -86,8 +86,7 @@ service BlobService {
 
 message Blob {
   string name = 1;
-  optional bytes content = 2;
-  int64 updated_at = 3;
+  bytes content = 2;
 }
 
 message ListBlobsRequest {
@@ -96,7 +95,6 @@ message ListBlobsRequest {
 
 message ListBlobsResponse {
   repeated string blob_names = 1;
-  uint64 count = 2;
 }
 
 message GetBlobRequest {

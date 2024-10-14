@@ -33,7 +33,7 @@ func NewCmdList(c *cli.Config) *cobra.Command {
 				return err
 			}
 
-			if resp.GetCount() == 0 {
+			if len(resp.GetBlobNames()) == 0 {
 				return nil
 			}
 

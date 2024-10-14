@@ -89,24 +89,28 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 			mux.Handle("/", rmux)
 			mux.Handle("/docs/", swagger.Docs("/docs/", docs.SwaggerSchema()))
 
-			errch := make(chan error)
+			httpServer := &http.Server{
+				Handler: mux,
+			}
 
-			go func() {
-				lis, err := net.Listen("tcp", c.HTTPAddress())
-				if err != nil {
-					errch <- err
-				}
-				slog.Info("started listening", "protocol", "http", "address", c.HTTPAddress())
-				errch <- http.Serve(lis, mux)
-			}()
+			slog.Info("starting blob server", "grpc_address", c.GRPCAddress(), "http_address", c.HTTPAddress())
+
+			errch := make(chan error)
 
 			go func() {
 				lis, err := net.Listen("tcp", c.GRPCAddress())
 				if err != nil {
 					errch <- err
 				}
-				slog.Info("started listening", "protocol", "grpc", "address", c.GRPCAddress())
 				errch <- grpcServer.Serve(lis)
+			}()
+
+			go func() {
+				lis, err := net.Listen("tcp", c.HTTPAddress())
+				if err != nil {
+					errch <- err
+				}
+				errch <- httpServer.Serve(lis)
 			}()
 
 			return <-errch

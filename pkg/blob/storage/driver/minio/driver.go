@@ -71,24 +71,19 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	object, err := d.minioClient.GetObject(ctx, d.bucket, name, minio.GetObjectOptions{})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer object.Close()
 
 	content, err := io.ReadAll(object)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	info, err := object.Stat()
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return content, info.LastModified.Unix(), nil
+	return content, nil
 }
 
 func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {

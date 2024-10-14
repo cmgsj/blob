@@ -127,22 +127,22 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	return objectNames, nil
 }
 
-func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, int64, error) {
+func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	object, err := d.s3Client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(d.bucket),
 		Key:    aws.String(name),
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer object.Body.Close()
 
 	content, err := io.ReadAll(object.Body)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	return content, object.LastModified.Unix(), nil
+	return content, nil
 }
 
 func (d *Driver) WriteObject(ctx context.Context, name string, content []byte) error {
