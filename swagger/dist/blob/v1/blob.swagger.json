@@ -6,11 +6,8 @@
   },
   "tags": [
     {
-      "name": "blob.v1",
-      "description": "Blob Service API"
-    },
-    {
-      "name": "BlobService"
+      "name": "BlobService",
+      "description": "Blob Service"
     }
   ],
   "schemes": [
@@ -51,7 +48,7 @@
           }
         ],
         "tags": [
-          "blob.v1"
+          "BlobService"
         ],
         "security": [
           {
@@ -87,7 +84,7 @@
           }
         ],
         "tags": [
-          "blob.v1"
+          "BlobService"
         ],
         "security": [
           {
@@ -121,7 +118,7 @@
           }
         ],
         "tags": [
-          "blob.v1"
+          "BlobService"
         ],
         "security": [
           {
@@ -163,7 +160,7 @@
           }
         ],
         "tags": [
-          "blob.v1"
+          "BlobService"
         ],
         "security": [
           {

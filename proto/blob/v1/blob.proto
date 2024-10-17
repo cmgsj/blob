@@ -16,8 +16,8 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   consumes: "application/json"
   produces: "application/json"
   tags: {
-    name: "blob.v1"
-    description: "Blob Service API"
+    name: "BlobService"
+    description: "Blob Service"
   }
   security_definitions: {
     security: {
@@ -40,7 +40,7 @@ service BlobService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "List blobs"
       operation_id: "list_blobs"
-      tags: "blob.v1"
+      tags: "BlobService"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
@@ -51,7 +51,7 @@ service BlobService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Get blob"
       operation_id: "get_blob"
-      tags: "blob.v1"
+      tags: "BlobService"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
@@ -65,7 +65,7 @@ service BlobService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Put blob"
       operation_id: "put_blob"
-      tags: "blob.v1"
+      tags: "BlobService"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
@@ -76,7 +76,7 @@ service BlobService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Delete blob"
       operation_id: "delete_blob"
-      tags: "blob.v1"
+      tags: "BlobService"
       security: {
         security_requirement: {key: "APIKeyAuth"}
       }
