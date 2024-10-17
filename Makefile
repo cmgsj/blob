@@ -2,6 +2,7 @@ SHELL := /bin/bash
 
 MODULE := $$(go list -m)
 VERSION := 1.0.0
+SWAGGER_UI_VERSION := ''
 
 .PHONY: default
 default: fmt install
@@ -13,11 +14,21 @@ fmt:
 		goimports -w -local $(MODULE) "$${file}"; \
 	done
 
-.PHONY: gen
-gen:
+.PHONY: generate
+generate: generate/buf generate/swagger
+
+.PHONY: generate/buf
+generate/buf:
 	@rm -rf pkg/gen
 	@rm -rf pkg/docs/docs.swagger.json
-	@buf format --write && buf generate
+	@buf format --write
+	@buf lint
+	@buf breaking --against "https://$(MODULE).git#branch=main"
+	@buf generate
+
+.PHONY: generate/swagger
+generate/swagger:
+	@echo "generating swagger"
 
 .PHONY: test
 test:
@@ -32,7 +43,7 @@ install:
 	@$(MAKE) binary cmd=install version=$(VERSION)
 
 .PRONY: binary
-binary: gen
+binary: generate
 	@if [[ -z "$${cmd}" ]]; then \
 		echo "must set cmd env var"; \
 		exit 1; \

@@ -10,7 +10,6 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.32.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.65.3
 	github.com/bufbuild/buf v1.45.0
-	github.com/cmgsj/go-lib v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
 	github.com/minio/minio-go/v7 v7.0.78

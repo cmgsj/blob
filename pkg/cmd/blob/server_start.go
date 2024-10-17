@@ -10,7 +10,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/cmgsj/go-lib/swagger"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,9 +29,9 @@ import (
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/minio"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/s3"
 	"github.com/cmgsj/blob/pkg/cli"
-	"github.com/cmgsj/blob/pkg/docs"
 	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
 	"github.com/cmgsj/blob/pkg/interceptors"
+	"github.com/cmgsj/blob/swagger"
 )
 
 func NewCmdServerStart(c *cli.Config) *cobra.Command {
@@ -87,7 +86,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 			mux := http.NewServeMux()
 
 			mux.Handle("/", rmux)
-			mux.Handle("/docs/", swagger.Docs("/docs/", docs.SwaggerSchema()))
+			mux.Handle("/docs/", http.StripPrefix("/docs", swagger.Handler()))
 
 			httpServer := &http.Server{
 				Handler: mux,
