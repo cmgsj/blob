@@ -9,7 +9,7 @@ default: fmt install
 
 .PHONY: fmt
 fmt:
-	@find . -type f -name "*.go" ! -path "./pkg/gen/*" ! -path "./vendor/*" | while read -r file; do \
+	@find . -type f -name "*.go" ! -path "./pkg/gen/*" | while read -r file; do \
 		go fmt "$${file}" 2>&1 | grep -v "is a program, not an importable package"; \
 		goimports -w -local $(MODULE) "$${file}"; \
 	done
