@@ -26,5 +26,6 @@ plugins:
       - generate_unbound_methods=false
   - local: protoc-gen-openapiv2
     out: swagger/dist
-    opt: generate_unbound_methods=false
+    opt:
+      - generate_unbound_methods=false
     strategy: all
