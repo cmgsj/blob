@@ -9,7 +9,7 @@ managed:
       module: buf.build/grpc-ecosystem/grpc-gateway
   override:
     - file_option: go_package_prefix
-      value: github.com/cmgsj/blob/proto
+      value: github.com/cmgsj/blob/pkg/gen/proto
 plugins:
   - local: protoc-gen-go
     out: pkg/gen/proto
