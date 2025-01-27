@@ -86,7 +86,7 @@ func NewCmdServerStart(c *cli.Config) *cobra.Command {
 			mux := http.NewServeMux()
 
 			mux.Handle("/", rmux)
-			mux.Handle("/docs/", http.StripPrefix("/docs", swagger.Handler()))
+			mux.Handle("/docs/", http.StripPrefix("/docs", http.FileServerFS(swagger.Handler())))
 
 			httpServer := &http.Server{
 				Handler: mux,

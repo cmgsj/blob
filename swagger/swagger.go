@@ -3,7 +3,6 @@ package swagger
 import (
 	"embed"
 	"io/fs"
-	"net/http"
 )
 
 var (
@@ -11,11 +10,11 @@ var (
 	dist embed.FS
 )
 
-func Handler() http.Handler {
+func Handler() fs.FS {
 	distFS, err := fs.Sub(dist, "dist")
 	if err != nil {
 		panic(err)
 	}
 
-	return http.FileServer(http.FS(distFS))
+	return distFS
 }
