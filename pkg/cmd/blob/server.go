@@ -71,13 +71,13 @@ func NewCommandServer() *cobra.Command {
 			grpcServer := grpc.NewServer(
 				grpc.Creds(insecure.NewCredentials()),
 				grpc.ChainUnaryInterceptor(
-					logginginterceptors.UnaryServerInterceptor(logger),
 					recoveryinterceptors.UnaryServerInterceptor(),
+					logginginterceptors.UnaryServerInterceptor(logger),
 					protovalidateinterceptors.UnaryServerInterceptor(validator),
 				),
 				grpc.ChainStreamInterceptor(
-					logginginterceptors.StreamServerInterceptor(logger),
 					recoveryinterceptors.StreamServerInterceptor(),
+					logginginterceptors.StreamServerInterceptor(logger),
 					protovalidateinterceptors.StreamServerInterceptor(validator),
 				),
 			)
