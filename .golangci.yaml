@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
+# https://golangci-lint.run/usage/configuration
+version: "2"
+linters:
+  default: all
+  disable:
+    - cyclop
+    - depguard
+    - err113
+    - exhaustruct
+    - forcetypeassert
+    - funlen
+    - gocognit
+    - gocyclo
+    - gosec
+    - ireturn
+    - lll
+    - mnd
+    - nestif
+    - revive
+    - tagliatelle
+    - varnamelen
+    - wrapcheck
+    - wsl
+  settings:
+    exhaustive:
+      check:
+        - switch
+        - map
+      default-signifies-exhaustive: true
+      default-case-required: true
+    wsl_v5:
+      default: all
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - golines
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+      no-inline-comments: true
+      no-prefix-comments: true
+      custom-order: false
+      no-lex-order: false
+    gofmt:
+      simplify: true
+    gofumpt:
+      module-path: github.com/cmgsj/blob
+      extra-rules: true
+    golines:
+      max-len: 250
+      tab-len: 4
+      shorten-comments: true
+      reformat-tags: true
+      chain-split-dots: true
+issues:
+  max-issues-per-linter: 100
+  max-same-issues: 100
+  fix: true
+run:
+  allow-parallel-runners: true
+  allow-serial-runners: true

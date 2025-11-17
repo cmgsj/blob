@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/cmgsj/blob/pkg/blob/storage/driver"
-	blobv1 "github.com/cmgsj/blob/pkg/gen/proto/blob/v1"
+	apiv1 "github.com/cmgsj/blob/pkg/proto/blob/api/v1"
 )
 
 const ObjectPrefix = "blobs"
@@ -50,7 +50,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 	return objects, nil
 }
 
-func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
+func (s *Storage) GetBlob(ctx context.Context, name string) (*apiv1.Blob, error) {
 	path := joinBlobPath(s.objectPrefix, name)
 
 	content, err := s.driver.GetObject(ctx, path)
@@ -62,10 +62,12 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 		return nil, err
 	}
 
-	return &blobv1.Blob{
-		Name:    name,
-		Content: content,
-	}, nil
+	blob := &apiv1.Blob{}
+
+	blob.SetName(name)
+	blob.SetContent(content)
+
+	return blob, nil
 }
 
 func (s *Storage) PutBlob(ctx context.Context, name string, content []byte) error {

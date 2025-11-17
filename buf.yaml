@@ -1,18 +1,16 @@
 version: v2
 modules:
   - path: proto
-    name: buf.build/cmgsj/blob
     lint:
       use:
         - STANDARD
-      except:
-        - FIELD_NOT_REQUIRED
-        - PACKAGE_NO_IMPORT_CYCLE
+        - UNARY_RPC
       disallow_comment_ignores: true
     breaking:
-      except:
-        - EXTENSION_NO_DELETE
-        - FIELD_SAME_DEFAULT
+      use:
+        - FILE
+        - PACKAGE
+        - WIRE
+        - WIRE_JSON
 deps:
-  - buf.build/googleapis/googleapis
-  - buf.build/grpc-ecosystem/grpc-gateway
+  - buf.build/bufbuild/protovalidate

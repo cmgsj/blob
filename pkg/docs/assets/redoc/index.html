@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Redoc</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div
+      style="position: absolute; top: 1rem; right: 1rem; z-index: 2147483647"
+    >
+      <select id="openapi-select">
+        <option value="/docs/openapi/blob/api/v1/blob.openapi.json">
+          blob.api.v1.BlobService
+        </option>
+      </select>
+    </div>
+    <div id="redoc-container"></div>
+  </body>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  <script>
+    const openapiSelect = document.getElementById("openapi-select");
+    const redocContainer = document.getElementById("redoc-container");
+    function redocInit(url) {
+      Redoc.init(
+        url,
+        {
+          expandDefaultRequest: true,
+          expandDefaultResponse: true,
+          jsonSampleExpandLevel: "all",
+          schemaExpansionLevel: "all",
+        },
+        redocContainer
+      );
+    }
+    redocInit(openapiSelect.value);
+    openapiSelect.addEventListener("change", (event) => {
+      redocInit(event.target.value);
+    });
+  </script>
+</html>

@@ -1,0 +1,660 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "blob.api.v1"
+  },
+  "paths": {
+    "/blob.api.v1.BlobService/DeleteBlob": {
+      "post": {
+        "tags": [
+          "blob.api.v1.BlobService"
+        ],
+        "summary": "DeleteBlob",
+        "operationId": "blob.api.v1.BlobService.DeleteBlob",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/blob.api.v1.DeleteBlobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.DeleteBlobResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob.api.v1.BlobService/GetBlob": {
+      "get": {
+        "tags": [
+          "blob.api.v1.BlobService"
+        ],
+        "summary": "GetBlob",
+        "operationId": "blob.api.v1.BlobService.GetBlob.get",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          },
+          {
+            "name": "message",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.GetBlobRequest"
+                }
+              }
+            }
+          },
+          {
+            "name": "encoding",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/encoding"
+            }
+          },
+          {
+            "name": "base64",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/base64"
+            }
+          },
+          {
+            "name": "compression",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/compression"
+            }
+          },
+          {
+            "name": "connect",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/connect"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.GetBlobResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "blob.api.v1.BlobService"
+        ],
+        "summary": "GetBlob",
+        "operationId": "blob.api.v1.BlobService.GetBlob",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/blob.api.v1.GetBlobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.GetBlobResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob.api.v1.BlobService/ListBlobs": {
+      "get": {
+        "tags": [
+          "blob.api.v1.BlobService"
+        ],
+        "summary": "ListBlobs",
+        "operationId": "blob.api.v1.BlobService.ListBlobs.get",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          },
+          {
+            "name": "message",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.ListBlobsRequest"
+                }
+              }
+            }
+          },
+          {
+            "name": "encoding",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/encoding"
+            }
+          },
+          {
+            "name": "base64",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/base64"
+            }
+          },
+          {
+            "name": "compression",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/compression"
+            }
+          },
+          {
+            "name": "connect",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/connect"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.ListBlobsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "blob.api.v1.BlobService"
+        ],
+        "summary": "ListBlobs",
+        "operationId": "blob.api.v1.BlobService.ListBlobs",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/blob.api.v1.ListBlobsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.ListBlobsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob.api.v1.BlobService/SetBlob": {
+      "post": {
+        "tags": [
+          "blob.api.v1.BlobService"
+        ],
+        "summary": "SetBlob",
+        "operationId": "blob.api.v1.BlobService.SetBlob",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/blob.api.v1.SetBlobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/blob.api.v1.SetBlobResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "base64": {
+        "type": "boolean",
+        "title": "base64",
+        "description": "Specifies if the message query param is base64 encoded, which may be required for binary data"
+      },
+      "blob.api.v1.Blob": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "content": {
+            "type": "string",
+            "title": "content",
+            "format": "byte"
+          }
+        },
+        "title": "blob.api.v1.Blob",
+        "required": [
+          "name",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "blob.api.v1.DeleteBlobRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          }
+        },
+        "title": "blob.api.v1.DeleteBlobRequest",
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "blob.api.v1.DeleteBlobResponse": {
+        "type": "object",
+        "title": "blob.api.v1.DeleteBlobResponse",
+        "additionalProperties": false
+      },
+      "blob.api.v1.GetBlobRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          }
+        },
+        "title": "blob.api.v1.GetBlobRequest",
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "blob.api.v1.GetBlobResponse": {
+        "type": "object",
+        "properties": {
+          "blob": {
+            "title": "blob",
+            "$ref": "#/components/schemas/blob.api.v1.Blob"
+          }
+        },
+        "title": "blob.api.v1.GetBlobResponse",
+        "required": [
+          "blob"
+        ],
+        "additionalProperties": false
+      },
+      "blob.api.v1.ListBlobsRequest": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "path"
+          }
+        },
+        "title": "blob.api.v1.ListBlobsRequest",
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "blob.api.v1.ListBlobsResponse": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "names"
+          }
+        },
+        "title": "blob.api.v1.ListBlobsResponse",
+        "additionalProperties": false
+      },
+      "blob.api.v1.SetBlobRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "content": {
+            "type": "string",
+            "title": "content",
+            "format": "byte"
+          }
+        },
+        "title": "blob.api.v1.SetBlobRequest",
+        "required": [
+          "name",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "blob.api.v1.SetBlobResponse": {
+        "type": "object",
+        "title": "blob.api.v1.SetBlobResponse",
+        "additionalProperties": false
+      },
+      "compression": {
+        "title": "compression",
+        "enum": [
+          "identity",
+          "gzip",
+          "br"
+        ],
+        "description": "Which compression algorithm to use for this request"
+      },
+      "connect": {
+        "title": "connect",
+        "enum": [
+          "v1"
+        ],
+        "description": "Define the version of the Connect protocol"
+      },
+      "connect-protocol-version": {
+        "type": "number",
+        "title": "Connect-Protocol-Version",
+        "enum": [
+          1
+        ],
+        "description": "Define the version of the Connect protocol",
+        "const": 1
+      },
+      "connect-timeout-header": {
+        "type": "number",
+        "title": "Connect-Timeout-Ms",
+        "description": "Define the timeout, in ms"
+      },
+      "connect.error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "examples": [
+              "not_found"
+            ],
+            "enum": [
+              "canceled",
+              "unknown",
+              "invalid_argument",
+              "deadline_exceeded",
+              "not_found",
+              "already_exists",
+              "permission_denied",
+              "resource_exhausted",
+              "failed_precondition",
+              "aborted",
+              "out_of_range",
+              "unimplemented",
+              "internal",
+              "unavailable",
+              "data_loss",
+              "unauthenticated"
+            ],
+            "description": "The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code]."
+          },
+          "message": {
+            "type": "string",
+            "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client."
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/connect.error_details.Any"
+            },
+            "description": "A list of messages that carry the error details. There is no limit on the number of messages."
+          }
+        },
+        "title": "Connect Error",
+        "additionalProperties": true,
+        "description": "Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation"
+      },
+      "connect.error_details.Any": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "A URL that acts as a globally unique identifier for the type of the serialized message. For example: `type.googleapis.com/google.rpc.ErrorInfo`. This is used to determine the schema of the data in the `value` field and is the discriminator for the `debug` field."
+          },
+          "value": {
+            "type": "string",
+            "format": "binary",
+            "description": "The Protobuf message, serialized as bytes and base64-encoded. The specific message type is identified by the `type` field."
+          },
+          "debug": {
+            "oneOf": [
+              {
+                "type": "object",
+                "title": "Any",
+                "additionalProperties": true,
+                "description": "Detailed error information."
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type"
+            },
+            "title": "Debug",
+            "description": "Deserialized error detail payload. The 'type' field indicates the schema. This field is for easier debugging and should not be relied upon for application logic."
+          }
+        },
+        "additionalProperties": true,
+        "description": "Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details."
+      },
+      "encoding": {
+        "title": "encoding",
+        "enum": [
+          "proto",
+          "json"
+        ],
+        "description": "Define which encoding or 'Message-Codec' to use"
+      }
+    }
+  },
+  "security": [],
+  "tags": [
+    {
+      "name": "blob.api.v1.BlobService"
+    }
+  ]
+}

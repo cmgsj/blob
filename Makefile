@@ -1,115 +1,99 @@
 SHELL := /bin/bash
 
 MODULE := $$(go list -m)
-VERSION := 1.0.0
-SWAGGER_UI_VERSION :=
 
 .PHONY: default
-default: tidy fmt generate install
+default: tidy fmt generate build
 
 .PHONY: tools
 tools: tidy
-	@rm -f bin/*; \
-	go -C internal/tools list -e -f '{{range .Imports}}{{.}} {{end}}' tools.go | xargs go -C internal/tools install
+	@go -C tools install tool
 
 .PHONY: update
 update:
-	@go list -m -f '{{if and (not .Main) (not .Indirect)}}{{.Path}}{{end}}' all | xargs go get; \
-	go -C internal/tools list -m -f '{{if and (not .Main) (not .Indirect)}}{{.Path}}{{end}}' all | xargs go -C internal/tools get; \
-	$(MAKE) tidy
+	@go -C tools get tool
+	@go get $$(go mod edit -json | jq -r '.Require[] | select(.Indirect | not) | .Path')
+	@buf dep prune
+	@buf dep update
+	@$(MAKE) tidy
+	@$(MAKE) tools
+	@$(MAKE) build
 
 .PHONY: tidy
 tidy:
-	@go mod tidy; \
-	go -C internal/tools mod tidy
+	@go -C tools mod tidy
+	@go -C tools mod download
+	@go mod tidy
+	@go mod download
 
 .PHONY: fmt
-fmt: fmt/buf
-	@go fmt ./...; \
-	go -C internal/tools fmt ./... 2>&1 | grep -v 'is a program, not an importable package' || true; \
-	goimports -w -local $(MODULE) .; \
-	goimports -w -local $(MODULE) internal/tools; \
-	tagalign -fix -sort -order "json,yaml,validate" --strict ./... 2>&1 | grep -v 'proto' || true; \
+fmt: fmt/go fmt/proto
 
-.PHONY: fmt/buf
-fmt/buf:
+.PHONY: fmt/go
+fmt/go:
+	@golangci-lint fmt ./...
+
+.PHONY: fmt/proto
+fmt/proto:
 	@buf format --write .
 
 .PHONY: generate
-generate: generate/buf generate/swagger
+generate: generate/go generate/proto generate/docs
+
+.PHONY: generate/go
+generate/go:
 	@go generate ./...
 
-.PHONY: generate/buf
-generate/buf:
-	@rm -rf pkg/gen; \
-	find swagger/dist -type f -name '*.swagger.json' -delete; \
-	buf generate
+.PHONY: generate/proto
+generate/proto:
+	@rm -rf pkg/proto
+	@buf generate
 
-.PHONY: generate/swagger
-generate/swagger:
-	@version=$(SWAGGER_UI_VERSION); \
-	if [[ -z "$${version}" ]]; then \
-		version="$$(curl -sSL https://api.github.com/repos/swagger-api/swagger-ui/releases/latest | jq -r '.tag_name' | sed 's/^v//')"; \
-	fi; \
-	rm -rf /tmp/swagger-ui.tar.gz; \
-	curl -sSLo /tmp/swagger-ui.tar.gz "https://github.com/swagger-api/swagger-ui/archive/refs/tags/v$${version}.tar.gz"; \
-	rm -rf /tmp/swagger-ui; \
-	mkdir -p /tmp/swagger-ui; \
-	tar -xzf /tmp/swagger-ui.tar.gz -C /tmp/swagger-ui; \
-	mkdir -p swagger/dist; \
-	find swagger/dist -type f -not -name '*.swagger.json' -delete; \
-	cp -r /tmp/swagger-ui/swagger-ui-$${version}/dist/ swagger/dist/; \
-	urls="    urls: ["; \
-	for file in "$$(find swagger/dist -type f -name "*.swagger.json")"; do \
-		path="$${file#swagger/dist/}"; \
-		urls+="\n      { name: \"$${path}\", url: \"$${path}\" },\n"; \
-	done; \
-	urls+="    ],"; \
-	line="$$(cat swagger/dist/swagger-initializer.js | grep -n "url" | cut -d: -f1)"; \
-	before="$$(head -n "$$(($${line} - 1))" swagger/dist/swagger-initializer.js)"; \
-	after="$$(tail -n +"$$(($${line} + 1))" swagger/dist/swagger-initializer.js)"; \
-	echo -e "$${before}\n$${urls}\n$${after}" >swagger/dist/swagger-initializer.js
+.PHONY: generate/docs
+generate/docs:
+	@find pkg/docs/assets/openapi -type f -name '*.openapi.json' -delete
+	@rm -rf pkg/docs/assets/swagger
+	@find pkg/proto/blob/api -type f -name '*.openapi.json'  | while read -r file; do \
+		mkdir -p $$(dirname "pkg/docs/assets/openapi/$${file#pkg/proto/}"); \
+		cp "$$file" "pkg/docs/assets/openapi/$${file#pkg/proto/}"; \
+	done
+	@go run ./cmd/internal/swagger-gen -c swagger-gen.yaml
 
 .PHONY: lint
-lint:
-	@go vet ./...; \
-	golangci-lint run ./...; \
-	govulncheck ./...; \
-	buf lint; \
-	buf breaking --against "https://$(MODULE).git#branch=main"
+lint: lint/go lint/proto
+
+.PHONY: lint/go
+lint/go:
+	@govulncheck ./...
+	@golangci-lint run ./...
+
+.PHONY: lint/proto
+lint/proto:
+	@buf lint
+	@buf breaking --against "https://$(MODULE).git#branch=main"
 
 .PHONY: test
 test:
-	@go test -v ./...
+	@go test -coverprofile=cover.out -race ./...
+
+.PHONY: cover/html
+cover/html: test
+	@go tool cover -html=cover.out
+
+.PHONY: cover/func
+cover/func: test
+	@go tool cover -func=cover.out
+
+.PHONY: pprof/http
+pprof/http:
+	@go tool pprof -http=localhost:8081 http://localhost:8080/debug/pprof/profile
+	@open http://localhost:8081
 
 .PHONY: build
 build:
-	@$(MAKE) binary cmd=build version=$(VERSION)
+	@echo "building blob"
+	@CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -extldflags='-static'" -o ./bin/blob ./cmd/blob
 
-.PHONY: install
-install:
-	@$(MAKE) binary cmd=install version=$(VERSION)
-
-.PRONY: binary
-binary: generate
-	@if [[ -z "$${cmd}" ]]; then \
-		echo "must set cmd env var"; \
-		exit 1; \
-	fi; \
-	if [[ "$${cmd}" != "build" && "$${cmd}" != "install" ]]; then \
-		echo "unknown cmd '$${cmd}'"; \
-		exit 1; \
-	fi; \
-	if [[ -z "$${version}" ]]; then \
-		version="$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')"; \
-	fi; \
-	ldflags="-s -w -extldflags='-static'"; \
-	if [[ -n "$${version}" ]]; then \
-		ldflags+=" -X '$(MODULE)/pkg/cmd/blob.version=$${version}'"; \
-	fi; \
-	flags=(-trimpath -ldflags="$${ldflags}"); \
-	if [[ "$${cmd}" == "build" ]]; then \
-		flags+=(-o "bin/blob"); \
-	fi; \
-	echo "$${cmd}ing blob@$${version} $$(go env GOOS)/$$(go env GOARCH) cgo=$$(go env CGO_ENABLED)"; \
-	go "$${cmd}" "$${flags[@]}" ./cmd/blob
+.PHONY: clean
+clean:
+	@rm -rf bin

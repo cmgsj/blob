@@ -40,9 +40,11 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		return nil, fmt.Errorf("invalid s3 uri %q: host is required", opts.URI)
 	}
 
-	var bucket string
-	var objectPrefix string
-	var endpoint string
+	var (
+		bucket       string
+		objectPrefix string
+		endpoint     string
+	)
 
 	switch u.Scheme {
 	case "s3":
@@ -118,7 +120,7 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 		return nil, err
 	}
 
-	var objectNames []string
+	objectNames := make([]string, 0, len(objects.Contents))
 
 	for _, object := range objects.Contents {
 		objectNames = append(objectNames, *object.Key)
@@ -135,7 +137,8 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer object.Body.Close()
+
+	defer func() { _ = object.Body.Close() }()
 
 	content, err := io.ReadAll(object.Body)
 	if err != nil {
@@ -151,6 +154,7 @@ func (d *Driver) PutObject(ctx context.Context, name string, content []byte) err
 		Key:    aws.String(name),
 		Body:   bytes.NewReader(content),
 	})
+
 	return err
 }
 
@@ -159,10 +163,12 @@ func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 		Bucket: aws.String(d.bucket),
 		Key:    aws.String(name),
 	})
+
 	return err
 }
 
 func (d *Driver) IsObjectNotFound(err error) bool {
 	var e *types.NoSuchKey
+
 	return errors.As(err, &e)
 }

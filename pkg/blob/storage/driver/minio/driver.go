@@ -62,7 +62,7 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 		Recursive: true,
 	})
 
-	var objectNames []string
+	objectNames := make([]string, 0, len(objects))
 
 	for object := range objects {
 		objectNames = append(objectNames, object.Key)
@@ -76,7 +76,8 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer object.Close()
+
+	defer func() { _ = object.Close() }()
 
 	content, err := io.ReadAll(object)
 	if err != nil {
@@ -88,6 +89,7 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 
 func (d *Driver) PutObject(ctx context.Context, name string, content []byte) error {
 	_, err := d.minioClient.PutObject(ctx, d.bucket, name, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+
 	return err
 }
 

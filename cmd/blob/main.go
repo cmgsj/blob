@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	err := blob.NewCmdBlob().Execute()
+	err := blob.NewCommand().Execute()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -37,9 +37,11 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		return nil, fmt.Errorf("invalid gcs uri %q: host is required", opts.URI)
 	}
 
-	var bucket string
-	var objectPrefix string
-	var clientOpts []option.ClientOption
+	var (
+		bucket       string
+		objectPrefix string
+		clientOpts   []option.ClientOption
+	)
 
 	switch u.Scheme {
 	case "gs":
@@ -110,9 +112,10 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	for {
 		attrs, err := it.Next()
 		if err != nil {
-			if err == iterator.Done {
+			if errors.Is(err, iterator.Done) {
 				break
 			}
+
 			return nil, err
 		}
 
@@ -127,7 +130,8 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
+
+	defer func() { _ = reader.Close() }()
 
 	content, err := io.ReadAll(reader)
 	if err != nil {

@@ -15,11 +15,17 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
+go.work.sum
 
-/.vscode
-/bin
-/.tool-versions
+.cache/
+.idea/
+.vscode/
+bin/
+tmp/
+.DS_Store
+.env
+.tool-versions

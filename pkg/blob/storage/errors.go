@@ -1,11 +1,11 @@
 package storage
 
 const (
-	ErrBlobNotFound = errorString("blob not found")
+	ErrBlobNotFound = stringError("blob not found")
 )
 
-type errorString string
+type stringError string
 
-func (e errorString) Error() string {
+func (e stringError) Error() string {
 	return string(e)
 }

@@ -3,29 +3,24 @@ clean: true
 managed:
   enabled: true
   disable:
-    - file_option: go_package
-      module: buf.build/googleapis/googleapis
-    - file_option: go_package
-      module: buf.build/grpc-ecosystem/grpc-gateway
+    - file_option: go_package_prefix
+      module: buf.build/bufbuild/protovalidate
   override:
     - file_option: go_package_prefix
-      value: github.com/cmgsj/blob/pkg/gen/proto
+      value: github.com/cmgsj/blob/pkg/proto
 plugins:
   - local: protoc-gen-go
-    out: pkg/gen/proto
-    opt: paths=source_relative
-  - local: protoc-gen-go-grpc
-    out: pkg/gen/proto
+    out: pkg/proto
     opt:
       - paths=source_relative
-      - require_unimplemented_servers=true
-  - local: protoc-gen-grpc-gateway
-    out: pkg/gen/proto
+  - local: protoc-gen-connect-go
+    out: pkg/proto
     opt:
       - paths=source_relative
-      - generate_unbound_methods=false
-  - local: protoc-gen-openapiv2
-    out: swagger/dist
+  - local: protoc-gen-connect-openapi
+    out: pkg/proto
     opt:
-      - generate_unbound_methods=false
-    strategy: all
+      - allow-get
+      - base=base.openapi.yaml
+      - format=json
+      - fully-qualified-message-names

@@ -42,9 +42,11 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		return nil, fmt.Errorf("invalid azblob uri %q: host is required", opts.URI)
 	}
 
-	var bucket string
-	var objectPrefix string
-	var endpoint string
+	var (
+		bucket       string
+		objectPrefix string
+		endpoint     string
+	)
 
 	switch u.Scheme {
 	case "http", "https":
@@ -112,12 +114,12 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 	var objectNames []string
 
 	for pager.More() {
-		resp, err := pager.NextPage(ctx)
+		response, err := pager.NextPage(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, blob := range resp.Segment.BlobItems {
+		for _, blob := range response.Segment.BlobItems {
 			objectNames = append(objectNames, *blob.Name)
 		}
 	}
@@ -126,13 +128,14 @@ func (d *Driver) ListObjects(ctx context.Context, path string) ([]string, error)
 }
 
 func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
-	resp, err := d.azblobClient.NewContainerClient(d.bucket).NewBlockBlobClient(name).DownloadStream(ctx, &blob.DownloadStreamOptions{})
+	response, err := d.azblobClient.NewContainerClient(d.bucket).NewBlockBlobClient(name).DownloadStream(ctx, &blob.DownloadStreamOptions{})
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	content, err := io.ReadAll(resp.Body)
+	defer func() { _ = response.Body.Close() }()
+
+	content, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -142,11 +145,13 @@ func (d *Driver) GetObject(ctx context.Context, name string) ([]byte, error) {
 
 func (d *Driver) PutObject(ctx context.Context, name string, content []byte) error {
 	_, err := d.azblobClient.NewContainerClient(d.bucket).NewBlockBlobClient(name).UploadStream(ctx, bytes.NewReader(content), &blockblob.UploadStreamOptions{})
+
 	return err
 }
 
 func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 	_, err := d.azblobClient.NewContainerClient(d.bucket).NewBlobClient(name).Delete(ctx, &blob.DeleteOptions{})
+
 	return err
 }
 
