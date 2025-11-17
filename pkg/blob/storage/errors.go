@@ -1,7 +1,11 @@
 package storage
 
-import "errors"
-
-var (
-	ErrBlobNotFound = errors.New("blob not found")
+const (
+	ErrBlobNotFound = errorString("blob not found")
 )
+
+type errorString string
+
+func (e errorString) Error() string {
+	return string(e)
+}

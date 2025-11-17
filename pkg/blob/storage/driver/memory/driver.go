@@ -9,6 +9,8 @@ import (
 	"github.com/cmgsj/blob/pkg/blob/storage/driver"
 )
 
+var errObjectNotFound = errors.New("object not found")
+
 var _ driver.Driver = (*Driver)(nil)
 
 type Driver struct {
@@ -72,8 +74,6 @@ func (d *Driver) DeleteObject(ctx context.Context, name string) error {
 
 	return nil
 }
-
-var errObjectNotFound = errors.New("object not found")
 
 func (d *Driver) IsObjectNotFound(err error) bool {
 	return errors.Is(err, errObjectNotFound)

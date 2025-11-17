@@ -14,7 +14,6 @@ const ObjectPrefix = "blobs"
 
 type Storage struct {
 	driver       driver.Driver
-	bucket       string
 	objectPrefix string
 }
 
@@ -28,23 +27,14 @@ func NewStorage(ctx context.Context, driver driver.Driver) (*Storage, error) {
 		return nil, fmt.Errorf("bucket %q does not exist", driver.Bucket())
 	}
 
-	objectPrefix := driver.ObjectPrefix()
-
-	if objectPrefix == "" {
-		objectPrefix = ObjectPrefix
-	} else {
-		objectPrefix = blobPath(objectPrefix, ObjectPrefix)
-	}
-
 	return &Storage{
 		driver:       driver,
-		bucket:       driver.Bucket(),
-		objectPrefix: objectPrefix,
+		objectPrefix: joinBlobPath(driver.ObjectPrefix(), ObjectPrefix),
 	}, nil
 }
 
 func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) {
-	path = blobPath(s.objectPrefix, path)
+	path = joinBlobPath(s.objectPrefix, path)
 
 	objects, err := s.driver.ListObjects(ctx, path)
 	if err != nil {
@@ -52,7 +42,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 	}
 
 	for i := range objects {
-		objects[i] = blobPath(strings.TrimPrefix(objects[i], s.objectPrefix))
+		objects[i] = joinBlobPath(strings.TrimPrefix(objects[i], s.objectPrefix))
 	}
 
 	slices.Sort(objects)
@@ -61,7 +51,7 @@ func (s *Storage) ListBlobs(ctx context.Context, path string) ([]string, error) 
 }
 
 func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error) {
-	path := blobPath(s.objectPrefix, name)
+	path := joinBlobPath(s.objectPrefix, name)
 
 	content, err := s.driver.GetObject(ctx, path)
 	if err != nil {
@@ -79,7 +69,7 @@ func (s *Storage) GetBlob(ctx context.Context, name string) (*blobv1.Blob, error
 }
 
 func (s *Storage) PutBlob(ctx context.Context, name string, content []byte) error {
-	path := blobPath(s.objectPrefix, name)
+	path := joinBlobPath(s.objectPrefix, name)
 
 	err := s.driver.PutObject(ctx, path, content)
 	if err != nil {
@@ -90,7 +80,7 @@ func (s *Storage) PutBlob(ctx context.Context, name string, content []byte) erro
 }
 
 func (s *Storage) DeleteBlob(ctx context.Context, name string) error {
-	path := blobPath(s.objectPrefix, name)
+	path := joinBlobPath(s.objectPrefix, name)
 
 	err := s.driver.DeleteObject(ctx, path)
 	if err != nil {
@@ -104,7 +94,7 @@ func (s *Storage) DeleteBlob(ctx context.Context, name string) error {
 	return nil
 }
 
-func blobPath(base string, elems ...string) string {
+func joinBlobPath(base string, elems ...string) string {
 	var path []string
 
 	base = strings.Trim(base, "/")

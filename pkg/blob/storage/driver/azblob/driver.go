@@ -71,13 +71,13 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		return nil, err
 	}
 
-	azblobserviceClient, err := service.NewClient(endpoint, credential, &service.ClientOptions{})
+	azblobClient, err := service.NewClient(endpoint, credential, &service.ClientOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	return &Driver{
-		azblobClient: azblobserviceClient,
+		azblobClient: azblobClient,
 		bucket:       bucket,
 		objectPrefix: objectPrefix,
 	}, nil
@@ -94,7 +94,7 @@ func (d *Driver) ObjectPrefix() string {
 func (d *Driver) BucketExists(ctx context.Context, bucket string) (bool, error) {
 	_, err := d.azblobClient.NewContainerClient(d.bucket).GetProperties(ctx, &container.GetPropertiesOptions{})
 	if err != nil {
-		if errors.IsNotFoundErr(err) {
+		if d.IsObjectNotFound(err) {
 			return false, nil
 		}
 
