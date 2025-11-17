@@ -1,6 +1,8 @@
 #!/bin/bash
 
-blob server start \
+set -euo pipefail
+
+blob server \
 	--minio-address='localhost:9000' \
 	--minio-access-key='root' \
 	--minio-secret-key='password' \
