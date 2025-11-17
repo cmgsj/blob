@@ -2,15 +2,12 @@ package blob
 
 import (
 	"context"
-	"errors"
 	"expvar"
 	"fmt"
 	"log/slog"
 	"maps"
 	"net/http"
 	"net/http/pprof"
-	"os"
-	"os/signal"
 	"slices"
 	"strings"
 
@@ -23,9 +20,9 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
-	blobhandler "github.com/cmgsj/blob/pkg/blob/handler"
-	blobstorage "github.com/cmgsj/blob/pkg/blob/storage"
-	blobstorageriver "github.com/cmgsj/blob/pkg/blob/storage/driver"
+	"github.com/cmgsj/blob/pkg/blob"
+	"github.com/cmgsj/blob/pkg/blob/storage"
+	"github.com/cmgsj/blob/pkg/blob/storage/driver"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/azblob"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/gcs"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/memory"
@@ -43,8 +40,6 @@ func NewCommandServer() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
-
 			address := viper.GetString("address")
 			debugExpvar := viper.GetBool("debug-expvar")
 			debugPprof := viper.GetBool("debug-pprof")
@@ -54,21 +49,22 @@ func NewCommandServer() *cobra.Command {
 				return err
 			}
 
-			blobStorage, err := blobstorage.NewStorage(ctx, blobStorageDriver)
+			blobStorage, err := storage.NewStorage(ctx, blobStorageDriver)
 			if err != nil {
 				return err
 			}
 
-			blobHandler := blobhandler.NewHandler(blobStorage)
-
 			services := []string{
+				apiv1connect.BlobServiceName,
 				grpchealth.HealthV1ServiceName,
 				grpcreflect.ReflectV1ServiceName,
 				grpcreflect.ReflectV1AlphaServiceName,
-				apiv1connect.BlobServiceName,
 			}
 
+			blobService := blob.NewService(blobStorage)
+
 			grpcHealthChecker := grpchealth.NewStaticChecker(services...)
+
 			grpcReflectReflector := grpcreflect.NewStaticReflector(services...)
 
 			handlerOpts := []connect.HandlerOption{
@@ -81,10 +77,10 @@ func NewCommandServer() *cobra.Command {
 
 			mux := http.NewServeMux()
 
+			mux.Handle(apiv1connect.NewBlobServiceHandler(blobService, handlerOpts...))
 			mux.Handle(grpchealth.NewHandler(grpcHealthChecker, handlerOpts...))
 			mux.Handle(grpcreflect.NewHandlerV1(grpcReflectReflector, handlerOpts...))
 			mux.Handle(grpcreflect.NewHandlerV1Alpha(grpcReflectReflector, handlerOpts...))
-			mux.Handle(apiv1connect.NewBlobServiceHandler(blobHandler, handlerOpts...))
 
 			mux.Handle("GET /docs/", http.StripPrefix("/docs", http.FileServerFS(docs.Assets())))
 
@@ -105,26 +101,11 @@ func NewCommandServer() *cobra.Command {
 				Handler: h2c.NewHandler(mux, &http2.Server{}),
 			}
 
-			go func() {
-				slog.Info("starting http server", "address", address)
+			slog.Info("starting http server", "address", address)
 
-				err := httpServer.ListenAndServe()
-				if err != nil && !errors.Is(err, http.ErrServerClosed) {
-					slog.Error("failed to run http server", "address", address, "error", err)
-				}
-
-				cancel()
-			}()
-
-			<-ctx.Done()
-
-			slog.Info("shutting down http server", "address", address)
-
-			err = httpServer.Shutdown(ctx)
+			err = httpServer.ListenAndServe()
 			if err != nil {
-				slog.Error("failed to shut down http server", "address", address, "error", err)
-
-				return err
+				slog.Error("failed to run http server", "address", address, "error", err)
 			}
 
 			return nil
@@ -158,7 +139,7 @@ func NewCommandServer() *cobra.Command {
 	return cmd
 }
 
-func newBlobStorageDriver(ctx context.Context) (blobstorageriver.Driver, error) {
+func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
 	driverTypes := []string{
 		"azblob",
 		"gcs",
@@ -191,7 +172,7 @@ func newBlobStorageDriver(ctx context.Context) (blobstorageriver.Driver, error) 
 	driverType := driverTypes[0]
 
 	var (
-		driver blobstorageriver.Driver
+		driver driver.Driver
 		err    error
 	)
 

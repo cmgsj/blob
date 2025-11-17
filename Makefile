@@ -53,7 +53,7 @@ generate/proto:
 generate/docs:
 	@find pkg/docs/assets/openapi -type f -name '*.openapi.json' -delete
 	@rm -rf pkg/docs/assets/swagger
-	@find pkg/proto/blob/api -type f -name '*.openapi.json'  | while read -r file; do \
+	@find pkg/proto/blob/api -type f -name '*.openapi.json' | while read -r file; do \
 		mkdir -p $$(dirname "pkg/docs/assets/openapi/$${file#pkg/proto/}"); \
 		cp "$$file" "pkg/docs/assets/openapi/$${file#pkg/proto/}"; \
 	done
