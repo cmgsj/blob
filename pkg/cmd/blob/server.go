@@ -9,9 +9,14 @@ import (
 	"slices"
 	"strings"
 
+	"buf.build/go/protovalidate"
+	logginginterceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	protovalidateinterceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
+	recoveryinterceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
@@ -26,7 +31,7 @@ import (
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/memory"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/minio"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/s3"
-	apiv1 "github.com/cmgsj/blob/pkg/proto/blob/api/v1"
+	blobv1 "github.com/cmgsj/blob/pkg/proto/blob/v1"
 )
 
 func NewCommandServer() *cobra.Command {
@@ -53,14 +58,31 @@ func NewCommandServer() *cobra.Command {
 
 			healthServer := health.NewServer()
 
-			healthServer.SetServingStatus(apiv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(blobv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 			healthServer.SetServingStatus(healthv1.Health_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 			healthServer.SetServingStatus(reflectionv1.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 			healthServer.SetServingStatus(reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
-			grpcServer := grpc.NewServer()
+			logger := logginginterceptors.LoggerFunc(func(ctx context.Context, level logginginterceptors.Level, msg string, fields ...any) {
+				slog.Log(ctx, slog.Level(level), msg, fields...)
+			})
+			validator := protovalidate.GlobalValidator
 
-			apiv1.RegisterBlobServiceServer(grpcServer, blobServer)
+			grpcServer := grpc.NewServer(
+				grpc.Creds(insecure.NewCredentials()),
+				grpc.ChainUnaryInterceptor(
+					logginginterceptors.UnaryServerInterceptor(logger),
+					recoveryinterceptors.UnaryServerInterceptor(),
+					protovalidateinterceptors.UnaryServerInterceptor(validator),
+				),
+				grpc.ChainStreamInterceptor(
+					logginginterceptors.StreamServerInterceptor(logger),
+					recoveryinterceptors.StreamServerInterceptor(),
+					protovalidateinterceptors.StreamServerInterceptor(validator),
+				),
+			)
+
+			blobv1.RegisterBlobServiceServer(grpcServer, blobServer)
 			healthv1.RegisterHealthServer(grpcServer, healthServer)
 			reflection.Register(grpcServer)
 

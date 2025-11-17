@@ -2,11 +2,12 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        (unknown)
-// source: blob/api/v1/blob.proto
+// source: blob/v1/blob.proto
 
-package apiv1
+package blobv1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	_ "google.golang.org/protobuf/types/gofeaturespb"
@@ -33,7 +34,7 @@ type Blob struct {
 
 func (x *Blob) Reset() {
 	*x = Blob{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[0]
+	mi := &file_blob_v1_blob_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +46,7 @@ func (x *Blob) String() string {
 func (*Blob) ProtoMessage() {}
 
 func (x *Blob) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[0]
+	mi := &file_blob_v1_blob_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -143,7 +144,7 @@ type ListBlobsRequest struct {
 
 func (x *ListBlobsRequest) Reset() {
 	*x = ListBlobsRequest{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[1]
+	mi := &file_blob_v1_blob_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -155,7 +156,7 @@ func (x *ListBlobsRequest) String() string {
 func (*ListBlobsRequest) ProtoMessage() {}
 
 func (x *ListBlobsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[1]
+	mi := &file_blob_v1_blob_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -219,7 +220,7 @@ type ListBlobsResponse struct {
 
 func (x *ListBlobsResponse) Reset() {
 	*x = ListBlobsResponse{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[2]
+	mi := &file_blob_v1_blob_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -231,7 +232,7 @@ func (x *ListBlobsResponse) String() string {
 func (*ListBlobsResponse) ProtoMessage() {}
 
 func (x *ListBlobsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[2]
+	mi := &file_blob_v1_blob_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -278,7 +279,7 @@ type GetBlobRequest struct {
 
 func (x *GetBlobRequest) Reset() {
 	*x = GetBlobRequest{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[3]
+	mi := &file_blob_v1_blob_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -290,7 +291,7 @@ func (x *GetBlobRequest) String() string {
 func (*GetBlobRequest) ProtoMessage() {}
 
 func (x *GetBlobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[3]
+	mi := &file_blob_v1_blob_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -354,7 +355,7 @@ type GetBlobResponse struct {
 
 func (x *GetBlobResponse) Reset() {
 	*x = GetBlobResponse{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[4]
+	mi := &file_blob_v1_blob_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -366,7 +367,7 @@ func (x *GetBlobResponse) String() string {
 func (*GetBlobResponse) ProtoMessage() {}
 
 func (x *GetBlobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[4]
+	mi := &file_blob_v1_blob_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -425,7 +426,7 @@ type SetBlobRequest struct {
 
 func (x *SetBlobRequest) Reset() {
 	*x = SetBlobRequest{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[5]
+	mi := &file_blob_v1_blob_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -437,7 +438,7 @@ func (x *SetBlobRequest) String() string {
 func (*SetBlobRequest) ProtoMessage() {}
 
 func (x *SetBlobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[5]
+	mi := &file_blob_v1_blob_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -532,7 +533,7 @@ type SetBlobResponse struct {
 
 func (x *SetBlobResponse) Reset() {
 	*x = SetBlobResponse{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[6]
+	mi := &file_blob_v1_blob_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -544,7 +545,7 @@ func (x *SetBlobResponse) String() string {
 func (*SetBlobResponse) ProtoMessage() {}
 
 func (x *SetBlobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[6]
+	mi := &file_blob_v1_blob_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -578,7 +579,7 @@ type DeleteBlobRequest struct {
 
 func (x *DeleteBlobRequest) Reset() {
 	*x = DeleteBlobRequest{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[7]
+	mi := &file_blob_v1_blob_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -590,7 +591,7 @@ func (x *DeleteBlobRequest) String() string {
 func (*DeleteBlobRequest) ProtoMessage() {}
 
 func (x *DeleteBlobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[7]
+	mi := &file_blob_v1_blob_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -653,7 +654,7 @@ type DeleteBlobResponse struct {
 
 func (x *DeleteBlobResponse) Reset() {
 	*x = DeleteBlobResponse{}
-	mi := &file_blob_api_v1_blob_proto_msgTypes[8]
+	mi := &file_blob_v1_blob_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -665,7 +666,7 @@ func (x *DeleteBlobResponse) String() string {
 func (*DeleteBlobResponse) ProtoMessage() {}
 
 func (x *DeleteBlobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_blob_api_v1_blob_proto_msgTypes[8]
+	mi := &file_blob_v1_blob_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -688,59 +689,59 @@ func (b0 DeleteBlobResponse_builder) Build() *DeleteBlobResponse {
 	return m0
 }
 
-var File_blob_api_v1_blob_proto protoreflect.FileDescriptor
+var File_blob_v1_blob_proto protoreflect.FileDescriptor
 
-const file_blob_api_v1_blob_proto_rawDesc = "" +
+const file_blob_v1_blob_proto_rawDesc = "" +
 	"\n" +
-	"\x16blob/api/v1/blob.proto\x12\vblob.api.v1\x1a!google/protobuf/go_features.proto\"4\n" +
-	"\x04Blob\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\fR\acontent\"&\n" +
-	"\x10ListBlobsRequest\x12\x12\n" +
-	"\x04path\x18\x01 \x01(\tR\x04path\")\n" +
+	"\x12blob/v1/blob.proto\x12\ablob.v1\x1a\x1bbuf/validate/validate.proto\x1a!google/protobuf/go_features.proto\"D\n" +
+	"\x04Blob\x12\x1a\n" +
+	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\x12 \n" +
+	"\acontent\x18\x02 \x01(\fB\x06\xbaH\x03\xc8\x01\x01R\acontent\".\n" +
+	"\x10ListBlobsRequest\x12\x1a\n" +
+	"\x04path\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04path\")\n" +
 	"\x11ListBlobsResponse\x12\x14\n" +
-	"\x05names\x18\x01 \x03(\tR\x05names\"$\n" +
-	"\x0eGetBlobRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"8\n" +
-	"\x0fGetBlobResponse\x12%\n" +
-	"\x04blob\x18\x01 \x01(\v2\x11.blob.api.v1.BlobR\x04blob\">\n" +
-	"\x0eSetBlobRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\fR\acontent\"\x11\n" +
-	"\x0fSetBlobResponse\"'\n" +
-	"\x11DeleteBlobRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\x14\n" +
-	"\x12DeleteBlobResponse2\xbc\x02\n" +
-	"\vBlobService\x12L\n" +
-	"\tListBlobs\x12\x1d.blob.api.v1.ListBlobsRequest\x1a\x1e.blob.api.v1.ListBlobsResponse\"\x00\x12F\n" +
-	"\aGetBlob\x12\x1b.blob.api.v1.GetBlobRequest\x1a\x1c.blob.api.v1.GetBlobResponse\"\x00\x12F\n" +
-	"\aSetBlob\x12\x1b.blob.api.v1.SetBlobRequest\x1a\x1c.blob.api.v1.SetBlobResponse\"\x00\x12O\n" +
+	"\x05names\x18\x01 \x03(\tR\x05names\",\n" +
+	"\x0eGetBlobRequest\x12\x1a\n" +
+	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\"<\n" +
+	"\x0fGetBlobResponse\x12)\n" +
+	"\x04blob\x18\x01 \x01(\v2\r.blob.v1.BlobB\x06\xbaH\x03\xc8\x01\x01R\x04blob\"N\n" +
+	"\x0eSetBlobRequest\x12\x1a\n" +
+	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\x12 \n" +
+	"\acontent\x18\x02 \x01(\fB\x06\xbaH\x03\xc8\x01\x01R\acontent\"\x11\n" +
+	"\x0fSetBlobResponse\"/\n" +
+	"\x11DeleteBlobRequest\x12\x1a\n" +
+	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\"\x14\n" +
+	"\x12DeleteBlobResponse2\x9c\x02\n" +
+	"\vBlobService\x12D\n" +
+	"\tListBlobs\x12\x19.blob.v1.ListBlobsRequest\x1a\x1a.blob.v1.ListBlobsResponse\"\x00\x12>\n" +
+	"\aGetBlob\x12\x17.blob.v1.GetBlobRequest\x1a\x18.blob.v1.GetBlobResponse\"\x00\x12>\n" +
+	"\aSetBlob\x12\x17.blob.v1.SetBlobRequest\x1a\x18.blob.v1.SetBlobResponse\"\x00\x12G\n" +
 	"\n" +
-	"DeleteBlob\x12\x1e.blob.api.v1.DeleteBlobRequest\x1a\x1f.blob.api.v1.DeleteBlobResponse\"\x00B\xa5\x01\n" +
-	"\x0fcom.blob.api.v1B\tBlobProtoP\x01Z1github.com/cmgsj/blob/pkg/proto/blob/api/v1;apiv1\xa2\x02\x03BAX\xaa\x02\vBlob.Api.V1\xca\x02\vBlob\\Api\\V1\xe2\x02\x17Blob\\Api\\V1\\GPBMetadata\xea\x02\rBlob::Api::V1\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
+	"DeleteBlob\x12\x1a.blob.v1.DeleteBlobRequest\x1a\x1b.blob.v1.DeleteBlobResponse\"\x00B\x8d\x01\n" +
+	"\vcom.blob.v1B\tBlobProtoP\x01Z.github.com/cmgsj/blob/pkg/proto/blob/v1;blobv1\xa2\x02\x03BXX\xaa\x02\aBlob.V1\xca\x02\aBlob\\V1\xe2\x02\x13Blob\\V1\\GPBMetadata\xea\x02\bBlob::V1\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
 
-var file_blob_api_v1_blob_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_blob_api_v1_blob_proto_goTypes = []any{
-	(*Blob)(nil),               // 0: blob.api.v1.Blob
-	(*ListBlobsRequest)(nil),   // 1: blob.api.v1.ListBlobsRequest
-	(*ListBlobsResponse)(nil),  // 2: blob.api.v1.ListBlobsResponse
-	(*GetBlobRequest)(nil),     // 3: blob.api.v1.GetBlobRequest
-	(*GetBlobResponse)(nil),    // 4: blob.api.v1.GetBlobResponse
-	(*SetBlobRequest)(nil),     // 5: blob.api.v1.SetBlobRequest
-	(*SetBlobResponse)(nil),    // 6: blob.api.v1.SetBlobResponse
-	(*DeleteBlobRequest)(nil),  // 7: blob.api.v1.DeleteBlobRequest
-	(*DeleteBlobResponse)(nil), // 8: blob.api.v1.DeleteBlobResponse
+var file_blob_v1_blob_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_blob_v1_blob_proto_goTypes = []any{
+	(*Blob)(nil),               // 0: blob.v1.Blob
+	(*ListBlobsRequest)(nil),   // 1: blob.v1.ListBlobsRequest
+	(*ListBlobsResponse)(nil),  // 2: blob.v1.ListBlobsResponse
+	(*GetBlobRequest)(nil),     // 3: blob.v1.GetBlobRequest
+	(*GetBlobResponse)(nil),    // 4: blob.v1.GetBlobResponse
+	(*SetBlobRequest)(nil),     // 5: blob.v1.SetBlobRequest
+	(*SetBlobResponse)(nil),    // 6: blob.v1.SetBlobResponse
+	(*DeleteBlobRequest)(nil),  // 7: blob.v1.DeleteBlobRequest
+	(*DeleteBlobResponse)(nil), // 8: blob.v1.DeleteBlobResponse
 }
-var file_blob_api_v1_blob_proto_depIdxs = []int32{
-	0, // 0: blob.api.v1.GetBlobResponse.blob:type_name -> blob.api.v1.Blob
-	1, // 1: blob.api.v1.BlobService.ListBlobs:input_type -> blob.api.v1.ListBlobsRequest
-	3, // 2: blob.api.v1.BlobService.GetBlob:input_type -> blob.api.v1.GetBlobRequest
-	5, // 3: blob.api.v1.BlobService.SetBlob:input_type -> blob.api.v1.SetBlobRequest
-	7, // 4: blob.api.v1.BlobService.DeleteBlob:input_type -> blob.api.v1.DeleteBlobRequest
-	2, // 5: blob.api.v1.BlobService.ListBlobs:output_type -> blob.api.v1.ListBlobsResponse
-	4, // 6: blob.api.v1.BlobService.GetBlob:output_type -> blob.api.v1.GetBlobResponse
-	6, // 7: blob.api.v1.BlobService.SetBlob:output_type -> blob.api.v1.SetBlobResponse
-	8, // 8: blob.api.v1.BlobService.DeleteBlob:output_type -> blob.api.v1.DeleteBlobResponse
+var file_blob_v1_blob_proto_depIdxs = []int32{
+	0, // 0: blob.v1.GetBlobResponse.blob:type_name -> blob.v1.Blob
+	1, // 1: blob.v1.BlobService.ListBlobs:input_type -> blob.v1.ListBlobsRequest
+	3, // 2: blob.v1.BlobService.GetBlob:input_type -> blob.v1.GetBlobRequest
+	5, // 3: blob.v1.BlobService.SetBlob:input_type -> blob.v1.SetBlobRequest
+	7, // 4: blob.v1.BlobService.DeleteBlob:input_type -> blob.v1.DeleteBlobRequest
+	2, // 5: blob.v1.BlobService.ListBlobs:output_type -> blob.v1.ListBlobsResponse
+	4, // 6: blob.v1.BlobService.GetBlob:output_type -> blob.v1.GetBlobResponse
+	6, // 7: blob.v1.BlobService.SetBlob:output_type -> blob.v1.SetBlobResponse
+	8, // 8: blob.v1.BlobService.DeleteBlob:output_type -> blob.v1.DeleteBlobResponse
 	5, // [5:9] is the sub-list for method output_type
 	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -748,26 +749,26 @@ var file_blob_api_v1_blob_proto_depIdxs = []int32{
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_blob_api_v1_blob_proto_init() }
-func file_blob_api_v1_blob_proto_init() {
-	if File_blob_api_v1_blob_proto != nil {
+func init() { file_blob_v1_blob_proto_init() }
+func file_blob_v1_blob_proto_init() {
+	if File_blob_v1_blob_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_blob_api_v1_blob_proto_rawDesc), len(file_blob_api_v1_blob_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_blob_v1_blob_proto_rawDesc), len(file_blob_v1_blob_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_blob_api_v1_blob_proto_goTypes,
-		DependencyIndexes: file_blob_api_v1_blob_proto_depIdxs,
-		MessageInfos:      file_blob_api_v1_blob_proto_msgTypes,
+		GoTypes:           file_blob_v1_blob_proto_goTypes,
+		DependencyIndexes: file_blob_v1_blob_proto_depIdxs,
+		MessageInfos:      file_blob_v1_blob_proto_msgTypes,
 	}.Build()
-	File_blob_api_v1_blob_proto = out.File
-	file_blob_api_v1_blob_proto_goTypes = nil
-	file_blob_api_v1_blob_proto_depIdxs = nil
+	File_blob_v1_blob_proto = out.File
+	file_blob_v1_blob_proto_goTypes = nil
+	file_blob_v1_blob_proto_depIdxs = nil
 }

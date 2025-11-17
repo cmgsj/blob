@@ -1,7 +1,8 @@
 edition = "2023";
 
-package blob.api.v1;
+package blob.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/go_features.proto";
 
 option features.(pb.go).api_level = API_OPAQUE;
@@ -14,12 +15,12 @@ service BlobService {
 }
 
 message Blob {
-  string name = 1;
-  bytes content = 2;
+  string name = 1 [(buf.validate.field).required = true];
+  bytes content = 2 [(buf.validate.field).required = true];
 }
 
 message ListBlobsRequest {
-  string path = 1;
+  string path = 1 [(buf.validate.field).required = true];
 }
 
 message ListBlobsResponse {
@@ -27,22 +28,22 @@ message ListBlobsResponse {
 }
 
 message GetBlobRequest {
-  string name = 1;
+  string name = 1 [(buf.validate.field).required = true];
 }
 
 message GetBlobResponse {
-  Blob blob = 1;
+  Blob blob = 1 [(buf.validate.field).required = true];
 }
 
 message SetBlobRequest {
-  string name = 1;
-  bytes content = 2;
+  string name = 1 [(buf.validate.field).required = true];
+  bytes content = 2 [(buf.validate.field).required = true];
 }
 
 message SetBlobResponse {}
 
 message DeleteBlobRequest {
-  string name = 1;
+  string name = 1 [(buf.validate.field).required = true];
 }
 
 message DeleteBlobResponse {}

@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/cmgsj/blob/pkg/blob/storage"
-	apiv1 "github.com/cmgsj/blob/pkg/proto/blob/api/v1"
+	blobv1 "github.com/cmgsj/blob/pkg/proto/blob/v1"
 )
 
-var _ apiv1.BlobServiceServer = (*Server)(nil)
+var _ blobv1.BlobServiceServer = (*Server)(nil)
 
 type Server struct {
 	storage *storage.Storage
@@ -19,50 +19,50 @@ func NewServer(storage *storage.Storage) *Server {
 	}
 }
 
-func (s *Server) ListBlobs(ctx context.Context, request *apiv1.ListBlobsRequest) (*apiv1.ListBlobsResponse, error) {
+func (s *Server) ListBlobs(ctx context.Context, request *blobv1.ListBlobsRequest) (*blobv1.ListBlobsResponse, error) {
 	names, err := s.storage.ListBlobs(ctx, request.GetPath())
 	if err != nil {
 		return nil, storageError(err)
 	}
 
-	response := &apiv1.ListBlobsResponse{}
+	response := &blobv1.ListBlobsResponse{}
 
 	response.SetNames(names)
 
 	return response, nil
 }
 
-func (s *Server) GetBlob(ctx context.Context, request *apiv1.GetBlobRequest) (*apiv1.GetBlobResponse, error) {
+func (s *Server) GetBlob(ctx context.Context, request *blobv1.GetBlobRequest) (*blobv1.GetBlobResponse, error) {
 	blob, err := s.storage.GetBlob(ctx, request.GetName())
 	if err != nil {
 		return nil, storageError(err)
 	}
 
-	response := &apiv1.GetBlobResponse{}
+	response := &blobv1.GetBlobResponse{}
 
 	response.SetBlob(blob)
 
 	return response, nil
 }
 
-func (s *Server) SetBlob(ctx context.Context, request *apiv1.SetBlobRequest) (*apiv1.SetBlobResponse, error) {
+func (s *Server) SetBlob(ctx context.Context, request *blobv1.SetBlobRequest) (*blobv1.SetBlobResponse, error) {
 	err := s.storage.PutBlob(ctx, request.GetName(), request.GetContent())
 	if err != nil {
 		return nil, storageError(err)
 	}
 
-	response := &apiv1.SetBlobResponse{}
+	response := &blobv1.SetBlobResponse{}
 
 	return response, nil
 }
 
-func (s *Server) DeleteBlob(ctx context.Context, request *apiv1.DeleteBlobRequest) (*apiv1.DeleteBlobResponse, error) {
+func (s *Server) DeleteBlob(ctx context.Context, request *blobv1.DeleteBlobRequest) (*blobv1.DeleteBlobResponse, error) {
 	err := s.storage.DeleteBlob(ctx, request.GetName())
 	if err != nil {
 		return nil, storageError(err)
 	}
 
-	response := &apiv1.DeleteBlobResponse{}
+	response := &blobv1.DeleteBlobResponse{}
 
 	return response, nil
 }

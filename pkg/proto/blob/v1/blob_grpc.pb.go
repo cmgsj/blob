@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: blob/api/v1/blob.proto
+// source: blob/v1/blob.proto
 
-package apiv1
+package blobv1
 
 import (
 	context "context"
@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BlobService_ListBlobs_FullMethodName  = "/blob.api.v1.BlobService/ListBlobs"
-	BlobService_GetBlob_FullMethodName    = "/blob.api.v1.BlobService/GetBlob"
-	BlobService_SetBlob_FullMethodName    = "/blob.api.v1.BlobService/SetBlob"
-	BlobService_DeleteBlob_FullMethodName = "/blob.api.v1.BlobService/DeleteBlob"
+	BlobService_ListBlobs_FullMethodName  = "/blob.v1.BlobService/ListBlobs"
+	BlobService_GetBlob_FullMethodName    = "/blob.v1.BlobService/GetBlob"
+	BlobService_SetBlob_FullMethodName    = "/blob.v1.BlobService/SetBlob"
+	BlobService_DeleteBlob_FullMethodName = "/blob.v1.BlobService/DeleteBlob"
 )
 
 // BlobServiceClient is the client API for BlobService service.
@@ -208,7 +208,7 @@ func _BlobService_DeleteBlob_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BlobService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "blob.api.v1.BlobService",
+	ServiceName: "blob.v1.BlobService",
 	HandlerType: (*BlobServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -229,5 +229,5 @@ var BlobService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "blob/api/v1/blob.proto",
+	Metadata: "blob/v1/blob.proto",
 }

@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	apiv1 "github.com/cmgsj/blob/pkg/proto/blob/api/v1"
+	blobv1 "github.com/cmgsj/blob/pkg/proto/blob/v1"
 )
 
 func NewCommandClient() *cobra.Command {
@@ -51,9 +51,9 @@ func NewCommandList() *cobra.Command {
 				return err
 			}
 
-			blobServiceClient := apiv1.NewBlobServiceClient(conn)
+			blobServiceClient := blobv1.NewBlobServiceClient(conn)
 
-			request := &apiv1.ListBlobsRequest{}
+			request := &blobv1.ListBlobsRequest{}
 
 			request.SetPath(path)
 
@@ -94,9 +94,9 @@ func NewCommandGet() *cobra.Command {
 				return err
 			}
 
-			blobServiceClient := apiv1.NewBlobServiceClient(conn)
+			blobServiceClient := blobv1.NewBlobServiceClient(conn)
 
-			request := &apiv1.GetBlobRequest{}
+			request := &blobv1.GetBlobRequest{}
 
 			request.SetName(name)
 
@@ -154,9 +154,9 @@ func NewCommandPut() *cobra.Command {
 				return err
 			}
 
-			blobServiceClient := apiv1.NewBlobServiceClient(conn)
+			blobServiceClient := blobv1.NewBlobServiceClient(conn)
 
-			request := &apiv1.SetBlobRequest{}
+			request := &blobv1.SetBlobRequest{}
 
 			request.SetName(name)
 			request.SetContent(content)
@@ -195,9 +195,9 @@ func NewCommandDelete() *cobra.Command {
 				return err
 			}
 
-			blobServiceClient := apiv1.NewBlobServiceClient(conn)
+			blobServiceClient := blobv1.NewBlobServiceClient(conn)
 
-			request := &apiv1.DeleteBlobRequest{}
+			request := &blobv1.DeleteBlobRequest{}
 
 			request.SetName(name)
 
