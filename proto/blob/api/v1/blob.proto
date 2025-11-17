@@ -2,33 +2,24 @@ edition = "2023";
 
 package blob.api.v1;
 
-import "buf/validate/validate.proto";
 import "google/protobuf/go_features.proto";
 
 option features.(pb.go).api_level = API_OPAQUE;
 
 service BlobService {
-  rpc ListBlobs(ListBlobsRequest) returns (ListBlobsResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  rpc GetBlob(GetBlobRequest) returns (GetBlobResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  rpc SetBlob(SetBlobRequest) returns (SetBlobResponse) {
-    option idempotency_level = IDEMPOTENT;
-  }
-  rpc DeleteBlob(DeleteBlobRequest) returns (DeleteBlobResponse) {
-    option idempotency_level = IDEMPOTENCY_UNKNOWN;
-  }
+  rpc ListBlobs(ListBlobsRequest) returns (ListBlobsResponse) {}
+  rpc GetBlob(GetBlobRequest) returns (GetBlobResponse) {}
+  rpc SetBlob(SetBlobRequest) returns (SetBlobResponse) {}
+  rpc DeleteBlob(DeleteBlobRequest) returns (DeleteBlobResponse) {}
 }
 
 message Blob {
-  string name = 1 [(buf.validate.field).required = true];
-  bytes content = 2 [(buf.validate.field).required = true];
+  string name = 1;
+  bytes content = 2;
 }
 
 message ListBlobsRequest {
-  string path = 1 [(buf.validate.field).required = true];
+  string path = 1;
 }
 
 message ListBlobsResponse {
@@ -36,22 +27,22 @@ message ListBlobsResponse {
 }
 
 message GetBlobRequest {
-  string name = 1 [(buf.validate.field).required = true];
+  string name = 1;
 }
 
 message GetBlobResponse {
-  Blob blob = 1 [(buf.validate.field).required = true];
+  Blob blob = 1;
 }
 
 message SetBlobRequest {
-  string name = 1 [(buf.validate.field).required = true];
-  bytes content = 2 [(buf.validate.field).required = true];
+  string name = 1;
+  bytes content = 2;
 }
 
 message SetBlobResponse {}
 
 message DeleteBlobRequest {
-  string name = 1 [(buf.validate.field).required = true];
+  string name = 1;
 }
 
 message DeleteBlobResponse {}

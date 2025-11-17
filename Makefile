@@ -38,7 +38,7 @@ fmt/proto:
 	@buf format --write .
 
 .PHONY: generate
-generate: generate/go generate/proto generate/docs
+generate: generate/go generate/proto
 
 .PHONY: generate/go
 generate/go:
@@ -48,16 +48,6 @@ generate/go:
 generate/proto:
 	@rm -rf pkg/proto
 	@buf generate
-
-.PHONY: generate/docs
-generate/docs:
-	@find pkg/docs/assets/openapi -type f -name '*.openapi.json' -delete
-	@rm -rf pkg/docs/assets/swagger
-	@find pkg/proto/blob/api -type f -name '*.openapi.json' | while read -r file; do \
-		mkdir -p $$(dirname "pkg/docs/assets/openapi/$${file#pkg/proto/}"); \
-		cp "$$file" "pkg/docs/assets/openapi/$${file#pkg/proto/}"; \
-	done
-	@go run ./cmd/internal/swagger-gen -c swagger-gen.yaml
 
 .PHONY: lint
 lint: lint/go lint/proto
@@ -74,20 +64,7 @@ lint/proto:
 
 .PHONY: test
 test:
-	@go test -coverprofile=cover.out -race ./...
-
-.PHONY: cover/html
-cover/html: test
-	@go tool cover -html=cover.out
-
-.PHONY: cover/func
-cover/func: test
-	@go tool cover -func=cover.out
-
-.PHONY: pprof/http
-pprof/http:
-	@go tool pprof -http=localhost:8081 http://localhost:8080/debug/pprof/profile
-	@open http://localhost:8081
+	@go test -v ./...
 
 .PHONY: build
 build:

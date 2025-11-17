@@ -7,7 +7,6 @@
 package apiv1
 
 import (
-	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	_ "google.golang.org/protobuf/types/gofeaturespb"
@@ -693,31 +692,31 @@ var File_blob_api_v1_blob_proto protoreflect.FileDescriptor
 
 const file_blob_api_v1_blob_proto_rawDesc = "" +
 	"\n" +
-	"\x16blob/api/v1/blob.proto\x12\vblob.api.v1\x1a\x1bbuf/validate/validate.proto\x1a!google/protobuf/go_features.proto\"D\n" +
-	"\x04Blob\x12\x1a\n" +
-	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\x12 \n" +
-	"\acontent\x18\x02 \x01(\fB\x06\xbaH\x03\xc8\x01\x01R\acontent\".\n" +
-	"\x10ListBlobsRequest\x12\x1a\n" +
-	"\x04path\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04path\")\n" +
+	"\x16blob/api/v1/blob.proto\x12\vblob.api.v1\x1a!google/protobuf/go_features.proto\"4\n" +
+	"\x04Blob\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\fR\acontent\"&\n" +
+	"\x10ListBlobsRequest\x12\x12\n" +
+	"\x04path\x18\x01 \x01(\tR\x04path\")\n" +
 	"\x11ListBlobsResponse\x12\x14\n" +
-	"\x05names\x18\x01 \x03(\tR\x05names\",\n" +
-	"\x0eGetBlobRequest\x12\x1a\n" +
-	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\"@\n" +
-	"\x0fGetBlobResponse\x12-\n" +
-	"\x04blob\x18\x01 \x01(\v2\x11.blob.api.v1.BlobB\x06\xbaH\x03\xc8\x01\x01R\x04blob\"N\n" +
-	"\x0eSetBlobRequest\x12\x1a\n" +
-	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\x12 \n" +
-	"\acontent\x18\x02 \x01(\fB\x06\xbaH\x03\xc8\x01\x01R\acontent\"\x11\n" +
-	"\x0fSetBlobResponse\"/\n" +
-	"\x11DeleteBlobRequest\x12\x1a\n" +
-	"\x04name\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04name\"\x14\n" +
-	"\x12DeleteBlobResponse2\xc8\x02\n" +
-	"\vBlobService\x12O\n" +
-	"\tListBlobs\x12\x1d.blob.api.v1.ListBlobsRequest\x1a\x1e.blob.api.v1.ListBlobsResponse\"\x03\x90\x02\x01\x12I\n" +
-	"\aGetBlob\x12\x1b.blob.api.v1.GetBlobRequest\x1a\x1c.blob.api.v1.GetBlobResponse\"\x03\x90\x02\x01\x12I\n" +
-	"\aSetBlob\x12\x1b.blob.api.v1.SetBlobRequest\x1a\x1c.blob.api.v1.SetBlobResponse\"\x03\x90\x02\x02\x12R\n" +
+	"\x05names\x18\x01 \x03(\tR\x05names\"$\n" +
+	"\x0eGetBlobRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"8\n" +
+	"\x0fGetBlobResponse\x12%\n" +
+	"\x04blob\x18\x01 \x01(\v2\x11.blob.api.v1.BlobR\x04blob\">\n" +
+	"\x0eSetBlobRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\fR\acontent\"\x11\n" +
+	"\x0fSetBlobResponse\"'\n" +
+	"\x11DeleteBlobRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\x14\n" +
+	"\x12DeleteBlobResponse2\xbc\x02\n" +
+	"\vBlobService\x12L\n" +
+	"\tListBlobs\x12\x1d.blob.api.v1.ListBlobsRequest\x1a\x1e.blob.api.v1.ListBlobsResponse\"\x00\x12F\n" +
+	"\aGetBlob\x12\x1b.blob.api.v1.GetBlobRequest\x1a\x1c.blob.api.v1.GetBlobResponse\"\x00\x12F\n" +
+	"\aSetBlob\x12\x1b.blob.api.v1.SetBlobRequest\x1a\x1c.blob.api.v1.SetBlobResponse\"\x00\x12O\n" +
 	"\n" +
-	"DeleteBlob\x12\x1e.blob.api.v1.DeleteBlobRequest\x1a\x1f.blob.api.v1.DeleteBlobResponse\"\x03\x90\x02\x00B\xa5\x01\n" +
+	"DeleteBlob\x12\x1e.blob.api.v1.DeleteBlobRequest\x1a\x1f.blob.api.v1.DeleteBlobResponse\"\x00B\xa5\x01\n" +
 	"\x0fcom.blob.api.v1B\tBlobProtoP\x01Z1github.com/cmgsj/blob/pkg/proto/blob/api/v1;apiv1\xa2\x02\x03BAX\xaa\x02\vBlob.Api.V1\xca\x02\vBlob\\Api\\V1\xe2\x02\x17Blob\\Api\\V1\\GPBMetadata\xea\x02\rBlob::Api::V1\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
 
 var file_blob_api_v1_blob_proto_msgTypes = make([]protoimpl.MessageInfo, 9)

@@ -13,14 +13,8 @@ plugins:
     out: pkg/proto
     opt:
       - paths=source_relative
-  - local: protoc-gen-connect-go
+  - local: protoc-gen-go-grpc
     out: pkg/proto
     opt:
       - paths=source_relative
-  - local: protoc-gen-connect-openapi
-    out: pkg/proto
-    opt:
-      - allow-get
-      - base=base.openapi.yaml
-      - format=json
-      - fully-qualified-message-names
+      - require_unimplemented_servers=false

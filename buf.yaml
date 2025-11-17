@@ -12,5 +12,3 @@ modules:
         - PACKAGE
         - WIRE
         - WIRE_JSON
-deps:
-  - buf.build/bufbuild/protovalidate

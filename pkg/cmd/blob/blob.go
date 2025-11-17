@@ -28,10 +28,8 @@ func NewCommand() *cobra.Command {
 
 	cmd.AddCommand(
 		NewCommandServer(),
-		NewCommandList(),
-		NewCommandGet(),
-		NewCommandPut(),
-		NewCommandDelete(),
+		NewCommandClient(),
+		NewCommandHealth(),
 	)
 
 	return cmd

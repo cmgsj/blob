@@ -2,23 +2,21 @@ package blob
 
 import (
 	"context"
-	"expvar"
 	"fmt"
 	"log/slog"
 	"maps"
-	"net/http"
-	"net/http/pprof"
+	"net"
 	"slices"
 	"strings"
 
-	"connectrpc.com/connect"
-	"connectrpc.com/grpchealth"
-	"connectrpc.com/grpcreflect"
-	"connectrpc.com/validate"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
+	reflectionv1 "google.golang.org/grpc/reflection/grpc_reflection_v1"
+	reflectionv1alpha "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 
 	"github.com/cmgsj/blob/pkg/blob"
 	"github.com/cmgsj/blob/pkg/blob/storage"
@@ -28,8 +26,7 @@ import (
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/memory"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/minio"
 	"github.com/cmgsj/blob/pkg/blob/storage/driver/s3"
-	"github.com/cmgsj/blob/pkg/docs"
-	"github.com/cmgsj/blob/pkg/proto/blob/api/v1/apiv1connect"
+	apiv1 "github.com/cmgsj/blob/pkg/proto/blob/api/v1"
 )
 
 func NewCommandServer() *cobra.Command {
@@ -41,8 +38,6 @@ func NewCommandServer() *cobra.Command {
 			ctx := cmd.Context()
 
 			address := viper.GetString("address")
-			debugExpvar := viper.GetBool("debug-expvar")
-			debugPprof := viper.GetBool("debug-pprof")
 
 			blobStorageDriver, err := newBlobStorageDriver(ctx)
 			if err != nil {
@@ -54,65 +49,40 @@ func NewCommandServer() *cobra.Command {
 				return err
 			}
 
-			services := []string{
-				apiv1connect.BlobServiceName,
-				grpchealth.HealthV1ServiceName,
-				grpcreflect.ReflectV1ServiceName,
-				grpcreflect.ReflectV1AlphaServiceName,
-			}
+			blobServer := blob.NewServer(blobStorage)
 
-			blobService := blob.NewService(blobStorage)
+			healthServer := health.NewServer()
 
-			grpcHealthChecker := grpchealth.NewStaticChecker(services...)
+			healthServer.SetServingStatus(apiv1.BlobService_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(healthv1.Health_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(reflectionv1.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
+			healthServer.SetServingStatus(reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
-			grpcReflectReflector := grpcreflect.NewStaticReflector(services...)
+			grpcServer := grpc.NewServer()
 
-			handlerOpts := []connect.HandlerOption{
-				connect.WithInterceptors(
-					validate.NewInterceptor(
-						validate.WithValidateResponses(),
-					),
-				),
-			}
+			apiv1.RegisterBlobServiceServer(grpcServer, blobServer)
+			healthv1.RegisterHealthServer(grpcServer, healthServer)
+			reflection.Register(grpcServer)
 
-			mux := http.NewServeMux()
+			listenConfig := &net.ListenConfig{}
 
-			mux.Handle(apiv1connect.NewBlobServiceHandler(blobService, handlerOpts...))
-			mux.Handle(grpchealth.NewHandler(grpcHealthChecker, handlerOpts...))
-			mux.Handle(grpcreflect.NewHandlerV1(grpcReflectReflector, handlerOpts...))
-			mux.Handle(grpcreflect.NewHandlerV1Alpha(grpcReflectReflector, handlerOpts...))
-
-			mux.Handle("GET /docs/", http.StripPrefix("/docs", http.FileServerFS(docs.Assets())))
-
-			if debugExpvar {
-				mux.Handle("GET /debug/vars", expvar.Handler())
-			}
-
-			if debugPprof {
-				mux.Handle("GET /debug/pprof/", http.HandlerFunc(pprof.Index))
-				mux.Handle("GET /debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
-				mux.Handle("GET /debug/pprof/profile", http.HandlerFunc(pprof.Profile))
-				mux.Handle("GET /debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
-				mux.Handle("GET /debug/pprof/trace", http.HandlerFunc(pprof.Trace))
-			}
-
-			httpServer := &http.Server{
-				Addr:    address,
-				Handler: h2c.NewHandler(mux, &http2.Server{}),
-			}
-
-			slog.Info("starting http server", "address", address)
-
-			err = httpServer.ListenAndServe()
+			listener, err := listenConfig.Listen(ctx, "tcp", address)
 			if err != nil {
-				slog.Error("failed to run http server", "address", address, "error", err)
+				return err
+			}
+
+			slog.Info("starting grpc server", "address", listener.Addr())
+
+			err = grpcServer.Serve(listener)
+			if err != nil {
+				slog.Error("failed to run grpc server", "error", err)
 			}
 
 			return nil
 		},
 	}
 
-	cmd.Flags().String("address", ":8080", "blob service address")
+	cmd.Flags().String("address", "localhost:2562", "server address")
 
 	cmd.Flags().String("azblob-uri", "", "azblob uri")
 	cmd.Flags().String("azblob-account-name", "", "azblob account name")
@@ -130,9 +100,6 @@ func NewCommandServer() *cobra.Command {
 	cmd.Flags().String("minio-bucket", "", "minio bucket")
 	cmd.Flags().String("minio-object-prefix", "", "minio object prefix")
 	cmd.Flags().Bool("minio-secure", false, "minio secure")
-
-	cmd.Flags().Bool("debug-expvar", false, "debug expvar")
-	cmd.Flags().Bool("debug-pprof", false, "debug pprof")
 
 	_ = viper.BindPFlags(cmd.Flags())
 
