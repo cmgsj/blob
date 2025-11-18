@@ -19,17 +19,24 @@ func NewCommand() *cobra.Command {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Version:       version,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			viper.AutomaticEnv()
+			viper.AllowEmptyEnv(true)
+			viper.SetEnvPrefix(cmd.Name())
+			viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+			return viper.BindPFlags(cmd.PersistentFlags())
+		},
 	}
 
-	viper.AutomaticEnv()
-	viper.AllowEmptyEnv(true)
-	viper.SetEnvPrefix(cmd.Name())
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	cmd.PersistentFlags().String("address", "localhost:2562", "server address")
 
 	cmd.AddCommand(
-		NewCommandServer(),
-		NewCommandClient(),
+		NewCommandList(),
+		NewCommandGet(),
+		NewCommandPut(),
+		NewCommandDelete(),
 		NewCommandHealth(),
+		NewCommandServer(),
 	)
 
 	return cmd

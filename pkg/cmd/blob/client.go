@@ -14,27 +14,14 @@ import (
 	blobv1 "github.com/cmgsj/blob/pkg/proto/blob/v1"
 )
 
-func NewCommandClient() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "client",
-		Short: "Blob service client",
-	}
-
-	cmd.AddCommand(
-		NewCommandList(),
-		NewCommandGet(),
-		NewCommandPut(),
-		NewCommandDelete(),
-	)
-
-	return cmd
-}
-
 func NewCommandList() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List blobs",
 		Args:  cobra.MaximumNArgs(1),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -70,10 +57,6 @@ func NewCommandList() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("address", "localhost:2562", "server address")
-
-	_ = viper.BindPFlags(cmd.Flags())
-
 	return cmd
 }
 
@@ -82,6 +65,9 @@ func NewCommandGet() *cobra.Command {
 		Use:   "get",
 		Short: "Get blob",
 		Args:  cobra.ExactArgs(1),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -114,10 +100,6 @@ func NewCommandGet() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("address", "localhost:2562", "server address")
-
-	_ = viper.BindPFlags(cmd.Flags())
-
 	return cmd
 }
 
@@ -126,6 +108,9 @@ func NewCommandPut() *cobra.Command {
 		Use:   "set",
 		Short: "Set blob",
 		Args:  cobra.ExactArgs(1),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -170,10 +155,7 @@ func NewCommandPut() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("address", "localhost:2562", "server address")
 	cmd.Flags().StringP("file", "f", "", "input file")
-
-	_ = viper.BindPFlags(cmd.Flags())
 
 	return cmd
 }
@@ -183,6 +165,9 @@ func NewCommandDelete() *cobra.Command {
 		Use:   "delete",
 		Short: "Delete blob",
 		Args:  cobra.ExactArgs(1),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -209,10 +194,6 @@ func NewCommandDelete() *cobra.Command {
 			return nil
 		},
 	}
-
-	cmd.Flags().String("address", "localhost:2562", "server address")
-
-	_ = viper.BindPFlags(cmd.Flags())
 
 	return cmd
 }

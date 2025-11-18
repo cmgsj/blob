@@ -39,6 +39,9 @@ func NewCommandServer() *cobra.Command {
 		Use:   "server",
 		Short: "Start blob server",
 		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -104,8 +107,6 @@ func NewCommandServer() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("address", "localhost:2562", "server address")
-
 	cmd.Flags().String("azblob-uri", "", "azblob uri")
 	cmd.Flags().String("azblob-account-name", "", "azblob account name")
 	cmd.Flags().String("azblob-account-key", "", "azblob account key")
@@ -122,8 +123,6 @@ func NewCommandServer() *cobra.Command {
 	cmd.Flags().String("minio-bucket", "", "minio bucket")
 	cmd.Flags().String("minio-object-prefix", "", "minio object prefix")
 	cmd.Flags().Bool("minio-secure", false, "minio secure")
-
-	_ = viper.BindPFlags(cmd.Flags())
 
 	return cmd
 }

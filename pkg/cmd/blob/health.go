@@ -1,6 +1,7 @@
 package blob
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"io"
@@ -35,6 +36,9 @@ func NewCommandHealthCheck() *cobra.Command {
 		Use:   "check",
 		Short: "Check health status",
 		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -55,20 +59,13 @@ func NewCommandHealthCheck() *cobra.Command {
 				return err
 			}
 
-			if service != "" {
-				_, _ = fmt.Fprintln(cmd.OutOrStdout(), service+":", response.GetStatus())
-			} else {
-				_, _ = fmt.Fprintln(cmd.OutOrStdout(), response.GetStatus())
-			}
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), response.GetStatus().String())
 
 			return nil
 		},
 	}
 
-	cmd.Flags().String("address", "localhost:2562", "server address")
 	cmd.Flags().String("service", "", "service")
-
-	_ = viper.BindPFlags(cmd.Flags())
 
 	return cmd
 }
@@ -78,6 +75,9 @@ func NewCommandHealthList() *cobra.Command {
 		Use:   "list",
 		Short: "List health statuses",
 		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -95,12 +95,10 @@ func NewCommandHealthList() *cobra.Command {
 				return err
 			}
 
-			statuses := response.GetStatuses()
-
 			tab := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 1, ' ', 0)
 
-			for _, service := range slices.Sorted(maps.Keys(statuses)) {
-				_, _ = fmt.Fprintln(tab, service+":\t", statuses[service].GetStatus())
+			for _, service := range slices.Sorted(maps.Keys(response.GetStatuses())) {
+				_, _ = fmt.Fprintln(tab, cmp.Or(service, "*")+":\t"+response.GetStatuses()[service].GetStatus().String())
 			}
 
 			err = tab.Flush()
@@ -112,10 +110,6 @@ func NewCommandHealthList() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("address", "localhost:2562", "server address")
-
-	_ = viper.BindPFlags(cmd.Flags())
-
 	return cmd
 }
 
@@ -124,6 +118,9 @@ func NewCommandHealthWatch() *cobra.Command {
 		Use:   "watch",
 		Short: "Watch health status",
 		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return viper.BindPFlags(cmd.Flags())
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -154,21 +151,14 @@ func NewCommandHealthWatch() *cobra.Command {
 					return err
 				}
 
-				if service != "" {
-					_, _ = fmt.Fprintln(cmd.OutOrStdout(), service+":", response.GetStatus())
-				} else {
-					_, _ = fmt.Fprintln(cmd.OutOrStdout(), response.GetStatus())
-				}
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), response.GetStatus().String())
 			}
 
 			return nil
 		},
 	}
 
-	cmd.Flags().String("address", "localhost:2562", "server address")
 	cmd.Flags().String("service", "", "service")
-
-	_ = viper.BindPFlags(cmd.Flags())
 
 	return cmd
 }
