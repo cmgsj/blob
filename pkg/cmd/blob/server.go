@@ -55,11 +55,6 @@ func NewCommandServer() *cobra.Command {
 
 			address := viper.GetString("address")
 
-			logger, err := newLogger()
-			if err != nil {
-				return err
-			}
-
 			blobStorageDriver, err := newBlobStorageDriver(ctx)
 			if err != nil {
 				return err
@@ -79,24 +74,34 @@ func NewCommandServer() *cobra.Command {
 			healthServer.SetServingStatus(reflectionv1.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 			healthServer.SetServingStatus(reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
+			logger, err := newLogger()
+			if err != nil {
+				return err
+			}
+
 			credentials, err := newServerTransportCredentials()
 			if err != nil {
 				return err
 			}
 
+			recoveryHandlerFunc := newRecoveryHandlerFunc(logger)
+			authFunc := newServerAuthFunc()
+			authMatcher := newAuthMatcher()
+			validator := newValidator()
+
 			grpcServer := grpc.NewServer(
 				grpc.Creds(credentials),
 				grpc.ChainUnaryInterceptor(
-					recovery.UnaryServerInterceptor(recovery.WithRecoveryHandlerContext(recoveryHandlerFunc(logger))),
+					recovery.UnaryServerInterceptor(recovery.WithRecoveryHandlerContext(recoveryHandlerFunc)),
 					logging.UnaryServerInterceptor(logger),
-					selector.UnaryServerInterceptor(auth.UnaryServerInterceptor(newServerAuthFunc()), authMatcher()),
-					protovalidate.UnaryServerInterceptor(validator()),
+					selector.UnaryServerInterceptor(auth.UnaryServerInterceptor(authFunc), authMatcher),
+					protovalidate.UnaryServerInterceptor(validator),
 				),
 				grpc.ChainStreamInterceptor(
-					recovery.StreamServerInterceptor(recovery.WithRecoveryHandlerContext(recoveryHandlerFunc(logger))),
+					recovery.StreamServerInterceptor(recovery.WithRecoveryHandlerContext(recoveryHandlerFunc)),
 					logging.StreamServerInterceptor(logger),
-					selector.StreamServerInterceptor(auth.StreamServerInterceptor(newServerAuthFunc()), authMatcher()),
-					protovalidate.StreamServerInterceptor(validator()),
+					selector.StreamServerInterceptor(auth.StreamServerInterceptor(authFunc), authMatcher),
+					protovalidate.StreamServerInterceptor(validator),
 				),
 			)
 
@@ -168,7 +173,7 @@ func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
 	}
 }
 
-func recoveryHandlerFunc(logger logging.Logger) recovery.RecoveryHandlerFuncContext {
+func newRecoveryHandlerFunc(logger logging.Logger) recovery.RecoveryHandlerFuncContext {
 	return func(ctx context.Context, p any) error {
 		logger.Log(ctx, logging.LevelError, "recovered from panic", "panic", p, "stack", debug.Stack())
 
@@ -176,7 +181,7 @@ func recoveryHandlerFunc(logger logging.Logger) recovery.RecoveryHandlerFuncCont
 	}
 }
 
-func bearerAuthFunc(authToken string) auth.AuthFunc {
+func newBearerAuthFunc(authToken string) auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		token, err := bearer.TokenFromContext(ctx)
 		if err != nil {
@@ -191,7 +196,7 @@ func bearerAuthFunc(authToken string) auth.AuthFunc {
 	}
 }
 
-func basicAuthFunc(authUsername, authPassword string) auth.AuthFunc {
+func newBasicAuthFunc(authUsername, authPassword string) auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		credentials, err := basic.CredentialsFromContext(ctx)
 		if err != nil {
@@ -206,13 +211,13 @@ func basicAuthFunc(authUsername, authPassword string) auth.AuthFunc {
 	}
 }
 
-func insecureAuthFunc() auth.AuthFunc {
+func newInsecureAuthFunc() auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		return ctx, nil
 	}
 }
 
-func authMatcher() selector.Matcher {
+func newAuthMatcher() selector.Matcher {
 	return selector.MatchFunc(func(ctx context.Context, callMeta interceptors.CallMeta) bool {
 		switch callMeta.Service {
 		case
@@ -227,6 +232,6 @@ func authMatcher() selector.Matcher {
 	})
 }
 
-func validator() validate.Validator {
+func newValidator() validate.Validator {
 	return validate.GlobalValidator
 }

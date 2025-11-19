@@ -35,7 +35,7 @@ func NewCommand() *cobra.Command {
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			viper.AutomaticEnv()
 			viper.AllowEmptyEnv(true)
-			viper.SetEnvPrefix(cmd.Name())
+			viper.SetEnvPrefix("blob")
 			viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
 			return viper.BindPFlags(cmd.PersistentFlags())
@@ -104,19 +104,19 @@ func newLogger() (logging.Logger, error) {
 }
 
 func newServerAuthFunc() auth.AuthFunc {
-	username := viper.GetString("auth-username")
-	password := viper.GetString("auth-password")
-	token := viper.GetString("auth-token")
+	authToken := viper.GetString("auth-token")
+	authUsername := viper.GetString("auth-username")
+	authPassword := viper.GetString("auth-password")
 
-	if token != "" {
-		return bearerAuthFunc(token)
+	if authToken != "" {
+		return newBearerAuthFunc(authToken)
 	}
 
-	if username != "" && password != "" {
-		return basicAuthFunc(username, password)
+	if authUsername != "" && authPassword != "" {
+		return newBasicAuthFunc(authUsername, authPassword)
 	}
 
-	return insecureAuthFunc()
+	return newInsecureAuthFunc()
 }
 
 func newClientPerRPCCredentials() credentials.PerRPCCredentials {
