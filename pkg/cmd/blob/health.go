@@ -11,8 +11,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -42,10 +40,9 @@ func NewCommandHealthCheck() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			address := viper.GetString("address")
 			service := viper.GetString("service")
 
-			conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := newClientConn()
 			if err != nil {
 				return err
 			}
@@ -81,9 +78,7 @@ func NewCommandHealthList() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			address := viper.GetString("address")
-
-			conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := newClientConn()
 			if err != nil {
 				return err
 			}
@@ -124,10 +119,9 @@ func NewCommandHealthWatch() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			address := viper.GetString("address")
 			service := viper.GetString("service")
 
-			conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := newClientConn()
 			if err != nil {
 				return err
 			}

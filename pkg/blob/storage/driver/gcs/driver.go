@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/storage"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
@@ -40,7 +41,7 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 	var (
 		bucket       string
 		objectPrefix string
-		clientOpts   []option.ClientOption
+		endpoint     string
 	)
 
 	switch u.Scheme {
@@ -61,15 +62,22 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 			objectPrefix = strings.Join(path[3:], "/")
 		}
 
-		endpoint := fmt.Sprintf("%s://%s/%s/%s/", u.Scheme, u.Host, path[0], path[1])
-
-		clientOpts = append(clientOpts, option.WithEndpoint(endpoint))
+		endpoint = fmt.Sprintf("%s://%s/%s/%s/", u.Scheme, u.Host, path[0], path[1])
 
 	default:
 		return nil, fmt.Errorf("invalid gcs uri %q: unknown scheme", opts.URI)
 	}
 
-	gcsClient, err := storage.NewClient(ctx, clientOpts...)
+	credentials, err := google.FindDefaultCredentials(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	gcsClient, err := storage.NewClient(
+		ctx,
+		option.WithCredentials(credentials),
+		option.WithEndpoint(endpoint),
+	)
 	if err != nil {
 		return nil, err
 	}

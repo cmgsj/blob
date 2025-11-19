@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 
@@ -25,9 +26,7 @@ type Driver struct {
 }
 
 type DriverOptions struct {
-	URI       string
-	AccessKey string
-	SecretKey string
+	URI string
 }
 
 func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
@@ -70,14 +69,13 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		return nil, fmt.Errorf("invalid s3 uri %q: unknown scheme", opts.URI)
 	}
 
-	s3Client := s3.New(s3.Options{
-		BaseEndpoint: aws.String(endpoint),
-		Credentials: aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
-			return aws.Credentials{
-				AccessKeyID:     opts.AccessKey,
-				SecretAccessKey: opts.SecretKey,
-			}, nil
-		}),
+	config, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	s3Client := s3.NewFromConfig(config, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(endpoint)
 	})
 
 	return &Driver{

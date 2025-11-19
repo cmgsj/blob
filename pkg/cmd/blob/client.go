@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	blobv1 "github.com/cmgsj/blob/pkg/proto/blob/v1"
 )
@@ -31,9 +30,7 @@ func NewCommandList() *cobra.Command {
 				path = args[0]
 			}
 
-			address := viper.GetString("address")
-
-			conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := newClientConn()
 			if err != nil {
 				return err
 			}
@@ -73,9 +70,7 @@ func NewCommandGet() *cobra.Command {
 
 			name := args[0]
 
-			address := viper.GetString("address")
-
-			conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := newClientConn()
 			if err != nil {
 				return err
 			}
@@ -116,7 +111,6 @@ func NewCommandPut() *cobra.Command {
 
 			name := args[0]
 
-			address := viper.GetString("address")
 			file := viper.GetString("file")
 
 			var (
@@ -134,7 +128,7 @@ func NewCommandPut() *cobra.Command {
 				return err
 			}
 
-			conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := newClientConn()
 			if err != nil {
 				return err
 			}
@@ -173,9 +167,7 @@ func NewCommandDelete() *cobra.Command {
 
 			name := args[0]
 
-			address := viper.GetString("address")
-
-			conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := newClientConn()
 			if err != nil {
 				return err
 			}
@@ -196,4 +188,30 @@ func NewCommandDelete() *cobra.Command {
 	}
 
 	return cmd
+}
+
+func newClientConn() (*grpc.ClientConn, error) {
+	address := viper.GetString("address")
+
+	var opts []grpc.DialOption
+
+	perRPCCredentials := newClientPerRPCCredentials()
+
+	if perRPCCredentials != nil {
+		opts = append(opts, grpc.WithPerRPCCredentials(perRPCCredentials))
+	}
+
+	transportCredentials, err := newClientTransportCredentials()
+	if err != nil {
+		return nil, err
+	}
+
+	opts = append(opts, grpc.WithTransportCredentials(transportCredentials))
+
+	conn, err := grpc.NewClient(address, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }

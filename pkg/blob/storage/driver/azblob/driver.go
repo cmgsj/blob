@@ -27,9 +27,7 @@ type Driver struct {
 }
 
 type DriverOptions struct {
-	URI         string
-	AccountName string
-	AccountKey  string
+	URI string
 }
 
 func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
@@ -49,6 +47,10 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 	)
 
 	switch u.Scheme {
+	case "az":
+		bucket = u.Host
+		objectPrefix = u.Path
+
 	case "http", "https":
 		path := strings.Split(strings.Trim(u.Path, "/"), "/")
 

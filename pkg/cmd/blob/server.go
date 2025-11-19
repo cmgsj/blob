@@ -3,25 +3,30 @@ package blob
 import (
 	"context"
 	"fmt"
-	"log/slog"
-	"maps"
 	"net"
-	"slices"
-	"strings"
+	"os/signal"
+	"runtime/debug"
+	"syscall"
 
-	"buf.build/go/protovalidate"
-	logginginterceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
-	protovalidateinterceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
-	recoveryinterceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	validate "buf.build/go/protovalidate"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
+	"github.com/riza-io/grpc-go/credentials/basic"
+	"github.com/riza-io/grpc-go/credentials/bearer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	reflectionv1 "google.golang.org/grpc/reflection/grpc_reflection_v1"
 	reflectionv1alpha "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
+	"google.golang.org/grpc/status"
 
 	"github.com/cmgsj/blob/pkg/blob"
 	"github.com/cmgsj/blob/pkg/blob/storage"
@@ -45,7 +50,15 @@ func NewCommandServer() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
+			ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+			defer cancel()
+
 			address := viper.GetString("address")
+
+			logger, err := newLogger()
+			if err != nil {
+				return err
+			}
 
 			blobStorageDriver, err := newBlobStorageDriver(ctx)
 			if err != nil {
@@ -66,22 +79,24 @@ func NewCommandServer() *cobra.Command {
 			healthServer.SetServingStatus(reflectionv1.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 			healthServer.SetServingStatus(reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName, healthv1.HealthCheckResponse_SERVING)
 
-			logger := logginginterceptors.LoggerFunc(func(ctx context.Context, level logginginterceptors.Level, msg string, fields ...any) {
-				slog.Log(ctx, slog.Level(level), msg, fields...)
-			})
-			validator := protovalidate.GlobalValidator
+			credentials, err := newServerTransportCredentials()
+			if err != nil {
+				return err
+			}
 
 			grpcServer := grpc.NewServer(
-				grpc.Creds(insecure.NewCredentials()),
+				grpc.Creds(credentials),
 				grpc.ChainUnaryInterceptor(
-					recoveryinterceptors.UnaryServerInterceptor(),
-					logginginterceptors.UnaryServerInterceptor(logger),
-					protovalidateinterceptors.UnaryServerInterceptor(validator),
+					recovery.UnaryServerInterceptor(recovery.WithRecoveryHandlerContext(recoveryHandlerFunc(logger))),
+					logging.UnaryServerInterceptor(logger),
+					selector.UnaryServerInterceptor(auth.UnaryServerInterceptor(newServerAuthFunc()), authMatcher()),
+					protovalidate.UnaryServerInterceptor(validator()),
 				),
 				grpc.ChainStreamInterceptor(
-					recoveryinterceptors.StreamServerInterceptor(),
-					logginginterceptors.StreamServerInterceptor(logger),
-					protovalidateinterceptors.StreamServerInterceptor(validator),
+					recovery.StreamServerInterceptor(recovery.WithRecoveryHandlerContext(recoveryHandlerFunc(logger))),
+					logging.StreamServerInterceptor(logger),
+					selector.StreamServerInterceptor(auth.StreamServerInterceptor(newServerAuthFunc()), authMatcher()),
+					protovalidate.StreamServerInterceptor(validator()),
 				),
 			)
 
@@ -96,116 +111,122 @@ func NewCommandServer() *cobra.Command {
 				return err
 			}
 
-			slog.Info("starting grpc server", "address", listener.Addr())
+			go func() {
+				logger.Log(ctx, logging.LevelInfo, "starting grpc server", "address", listener.Addr())
 
-			err = grpcServer.Serve(listener)
-			if err != nil {
-				slog.Error("failed to run grpc server", "error", err)
-			}
+				err = grpcServer.Serve(listener)
+				if err != nil {
+					logger.Log(ctx, logging.LevelError, "failed to run grpc server", "error", err)
+				}
+			}()
+
+			<-ctx.Done()
+
+			grpcServer.GracefulStop()
+			grpcServer.Stop()
 
 			return nil
 		},
 	}
 
-	cmd.Flags().String("azblob-uri", "", "azblob uri")
-	cmd.Flags().String("azblob-account-name", "", "azblob account name")
-	cmd.Flags().String("azblob-account-key", "", "azblob account key")
-
-	cmd.Flags().String("gcs-uri", "", "gcs uri")
-
-	cmd.Flags().String("s3-uri", "", "s3 uri")
-	cmd.Flags().String("s3-access-key", "", "s3 access key")
-	cmd.Flags().String("s3-secret-key", "", "s3 secret key")
-
-	cmd.Flags().String("minio-address", "", "minio address")
-	cmd.Flags().String("minio-access-key", "", "minio access key")
-	cmd.Flags().String("minio-secret-key", "", "minio secret key")
-	cmd.Flags().String("minio-bucket", "", "minio bucket")
-	cmd.Flags().String("minio-object-prefix", "", "minio object prefix")
-	cmd.Flags().Bool("minio-secure", false, "minio secure")
+	cmd.Flags().String("driver-type", "memory", "driver type")
+	cmd.Flags().String("driver-uri", "", "driver uri")
 
 	return cmd
 }
 
 func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
-	driverTypes := []string{
-		"azblob",
-		"gcs",
-		"s3",
-		"minio",
-	}
-
-	driverTypeSet := make(map[string]struct{})
-
-	for _, key := range viper.AllKeys() {
-		for _, driverType := range driverTypes {
-			if strings.HasPrefix(key, driverType) && viper.IsSet(key) {
-				driverTypeSet[driverType] = struct{}{}
-
-				break
-			}
-		}
-	}
-
-	driverTypes = slices.Collect(maps.Keys(driverTypeSet))
-
-	if len(driverTypes) > 1 {
-		return nil, fmt.Errorf("multiple blob storage drivers set: [%s]", strings.Join(driverTypes, ", "))
-	}
-
-	if len(driverTypes) == 0 {
-		driverTypes = []string{"memory"}
-	}
-
-	driverType := driverTypes[0]
-
-	var (
-		driver driver.Driver
-		err    error
-	)
+	driverType := viper.GetString("driver-type")
+	driverURI := viper.GetString("driver-uri")
 
 	switch driverType {
 	case "memory":
-		driver = memory.NewDriver()
+		return memory.NewDriver(), nil
 
 	case "azblob":
-		driver, err = azblob.NewDriver(ctx, azblob.DriverOptions{
-			URI:         viper.GetString("azblob-uri"),
-			AccountName: viper.GetString("azblob-account-name"),
-			AccountKey:  viper.GetString("azblob-account-key"),
+		return azblob.NewDriver(ctx, azblob.DriverOptions{
+			URI: driverURI,
 		})
 
 	case "gcs":
-		driver, err = gcs.NewDriver(ctx, gcs.DriverOptions{
-			URI: viper.GetString("gcs-uri"),
+		return gcs.NewDriver(ctx, gcs.DriverOptions{
+			URI: driverURI,
 		})
 
 	case "s3":
-		driver, err = s3.NewDriver(ctx, s3.DriverOptions{
-			URI:       viper.GetString("s3-uri"),
-			AccessKey: viper.GetString("s3-access-key"),
-			SecretKey: viper.GetString("s3-secret-key"),
+		return s3.NewDriver(ctx, s3.DriverOptions{
+			URI: driverURI,
 		})
 
 	case "minio":
-		driver, err = minio.NewDriver(ctx, minio.DriverOptions{
-			Address:      viper.GetString("minio-address"),
-			AccessKey:    viper.GetString("minio-access-key"),
-			SecretKey:    viper.GetString("minio-secret-key"),
-			Bucket:       viper.GetString("minio-bucket"),
-			ObjectPrefix: viper.GetString("minio-object-prefix"),
-			Secure:       viper.GetBool("minio-secure"),
+		return minio.NewDriver(ctx, minio.DriverOptions{
+			URI: driverURI,
 		})
 
 	default:
 		return nil, fmt.Errorf("unknown blob storage driver %q", driverType)
 	}
+}
 
-	if err != nil {
-		return nil, err
+func recoveryHandlerFunc(logger logging.Logger) recovery.RecoveryHandlerFuncContext {
+	return func(ctx context.Context, p any) error {
+		logger.Log(ctx, logging.LevelError, "recovered from panic", "panic", p, "stack", debug.Stack())
+
+		return status.Errorf(codes.Internal, "%s", p)
 	}
+}
 
-	slog.Info("using blob storage driver", "type", driverType)
+func bearerAuthFunc(authToken string) auth.AuthFunc {
+	return func(ctx context.Context) (context.Context, error) {
+		token, err := bearer.TokenFromContext(ctx)
+		if err != nil {
+			return nil, status.Error(codes.Unauthenticated, "invalid bearer auth header")
+		}
 
-	return driver, nil
+		if string(token) != authToken {
+			return nil, status.Error(codes.Unauthenticated, "invalid bearer auth token")
+		}
+
+		return ctx, nil
+	}
+}
+
+func basicAuthFunc(authUsername, authPassword string) auth.AuthFunc {
+	return func(ctx context.Context) (context.Context, error) {
+		credentials, err := basic.CredentialsFromContext(ctx)
+		if err != nil {
+			return nil, status.Error(codes.Unauthenticated, "invalid basic auth header")
+		}
+
+		if credentials.UserID != authUsername || credentials.Password != authPassword {
+			return nil, status.Error(codes.Unauthenticated, "invalid basic auth credentials")
+		}
+
+		return ctx, nil
+	}
+}
+
+func insecureAuthFunc() auth.AuthFunc {
+	return func(ctx context.Context) (context.Context, error) {
+		return ctx, nil
+	}
+}
+
+func authMatcher() selector.Matcher {
+	return selector.MatchFunc(func(ctx context.Context, callMeta interceptors.CallMeta) bool {
+		switch callMeta.Service {
+		case
+			healthv1.Health_ServiceDesc.ServiceName,
+			reflectionv1.ServerReflection_ServiceDesc.ServiceName,
+			reflectionv1alpha.ServerReflection_ServiceDesc.ServiceName:
+			return false
+
+		default:
+			return true
+		}
+	})
+}
+
+func validator() validate.Validator {
+	return validate.GlobalValidator
 }
