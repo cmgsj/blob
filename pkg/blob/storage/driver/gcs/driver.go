@@ -3,10 +3,7 @@ package gcs
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
-	"net/url"
-	"strings"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/oauth2/google"
@@ -15,6 +12,8 @@ import (
 
 	"github.com/cmgsj/blob/pkg/blob/storage/driver"
 )
+
+const DriverType = "gcs"
 
 var _ driver.Driver = (*Driver)(nil)
 
@@ -28,44 +27,10 @@ type DriverOptions struct {
 	URI string
 }
 
-func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
-	u, err := url.Parse(opts.URI)
+func NewDriver(ctx context.Context, o DriverOptions) (*Driver, error) {
+	uri, err := driver.ParseURI(DriverType, o.URI)
 	if err != nil {
 		return nil, err
-	}
-
-	if u.Host == "" {
-		return nil, fmt.Errorf("invalid gcs uri %q: host is required", opts.URI)
-	}
-
-	var (
-		bucket       string
-		objectPrefix string
-		endpoint     string
-	)
-
-	switch u.Scheme {
-	case "gs":
-		bucket = u.Host
-		objectPrefix = u.Path
-
-	case "http", "https":
-		path := strings.Split(strings.Trim(u.Path, "/"), "/")
-
-		if len(path) < 3 {
-			return nil, fmt.Errorf("invalid gcs uri %q: bucket is required", opts.URI)
-		}
-
-		bucket = path[2]
-
-		if len(path) > 3 {
-			objectPrefix = strings.Join(path[3:], "/")
-		}
-
-		endpoint = fmt.Sprintf("%s://%s/%s/%s/", u.Scheme, u.Host, path[0], path[1])
-
-	default:
-		return nil, fmt.Errorf("invalid gcs uri %q: unknown scheme", opts.URI)
 	}
 
 	credentials, err := google.FindDefaultCredentials(ctx)
@@ -76,7 +41,7 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 	gcsClient, err := storage.NewClient(
 		ctx,
 		option.WithCredentials(credentials),
-		option.WithEndpoint(endpoint),
+		option.WithEndpoint(uri.Host),
 	)
 	if err != nil {
 		return nil, err
@@ -84,8 +49,8 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 
 	return &Driver{
 		gcsClient:    gcsClient,
-		bucket:       bucket,
-		objectPrefix: objectPrefix,
+		bucket:       uri.Bucket,
+		objectPrefix: uri.ObjectPrefix,
 	}, nil
 }
 

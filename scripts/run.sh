@@ -2,10 +2,8 @@
 
 set -euo pipefail
 
-blob server \
-	--minio-address='localhost:9000' \
-	--minio-access-key='root' \
-	--minio-secret-key='password' \
-	--minio-bucket='test' \
-	--minio-object-prefix='' \
-	--minio-secure='false'
+export MINIO_ROOT_USER='root'
+export MINIO_ROOT_PASSWORD='password'
+
+go run ./cmd/blob server \
+    --driver='minio=http://localhost:9000/test'

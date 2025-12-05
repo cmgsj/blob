@@ -9,6 +9,8 @@ import (
 	"github.com/cmgsj/blob/pkg/blob/storage/driver"
 )
 
+const DriverType = "memory"
+
 var errObjectNotFound = errors.New("object not found")
 
 var _ driver.Driver = (*Driver)(nil)

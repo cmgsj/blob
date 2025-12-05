@@ -6,6 +6,7 @@ import (
 	"net"
 	"os/signal"
 	"runtime/debug"
+	"strings"
 	"syscall"
 
 	validate "buf.build/go/protovalidate"
@@ -134,36 +135,36 @@ func NewCommandServer() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("driver-type", "memory", "driver type")
-	cmd.Flags().String("driver-uri", "", "driver uri")
+	cmd.Flags().String("driver", "memory", "driver")
 
 	return cmd
 }
 
 func newBlobStorageDriver(ctx context.Context) (driver.Driver, error) {
-	driverType := viper.GetString("driver-type")
-	driverURI := viper.GetString("driver-uri")
+	driver := viper.GetString("driver")
+
+	driverType, driverURI, _ := strings.Cut(driver, "=")
 
 	switch driverType {
-	case "memory":
+	case memory.DriverType:
 		return memory.NewDriver(), nil
 
-	case "azblob":
+	case azblob.DriverType:
 		return azblob.NewDriver(ctx, azblob.DriverOptions{
 			URI: driverURI,
 		})
 
-	case "gcs":
+	case gcs.DriverType:
 		return gcs.NewDriver(ctx, gcs.DriverOptions{
 			URI: driverURI,
 		})
 
-	case "s3":
+	case s3.DriverType:
 		return s3.NewDriver(ctx, s3.DriverOptions{
 			URI: driverURI,
 		})
 
-	case "minio":
+	case minio.DriverType:
 		return minio.NewDriver(ctx, minio.DriverOptions{
 			URI: driverURI,
 		})

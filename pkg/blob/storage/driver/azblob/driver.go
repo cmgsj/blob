@@ -3,10 +3,7 @@ package azblob
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
-	"net/url"
-	"strings"
 
 	"github.com/Azure/azure-sdk-for-go-extensions/pkg/errors"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -17,6 +14,8 @@ import (
 
 	"github.com/cmgsj/blob/pkg/blob/storage/driver"
 )
+
+const DriverType = "azblob"
 
 var _ driver.Driver = (*Driver)(nil)
 
@@ -30,44 +29,10 @@ type DriverOptions struct {
 	URI string
 }
 
-func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
-	u, err := url.Parse(opts.URI)
+func NewDriver(ctx context.Context, o DriverOptions) (*Driver, error) {
+	uri, err := driver.ParseURI(DriverType, o.URI)
 	if err != nil {
 		return nil, err
-	}
-
-	if u.Host == "" {
-		return nil, fmt.Errorf("invalid azblob uri %q: host is required", opts.URI)
-	}
-
-	var (
-		bucket       string
-		objectPrefix string
-		endpoint     string
-	)
-
-	switch u.Scheme {
-	case "az":
-		bucket = u.Host
-		objectPrefix = u.Path
-
-	case "http", "https":
-		path := strings.Split(strings.Trim(u.Path, "/"), "/")
-
-		if len(path) < 3 {
-			return nil, fmt.Errorf("invalid azblob uri %q: bucket is required", opts.URI)
-		}
-
-		bucket = path[2]
-
-		if len(path) > 3 {
-			objectPrefix = strings.Join(path[3:], "/")
-		}
-
-		endpoint = fmt.Sprintf("%s://%s/%s/%s/", u.Scheme, u.Host, path[0], path[1])
-
-	default:
-		return nil, fmt.Errorf("invalid azblob uri %q: unknown scheme", opts.URI)
 	}
 
 	credential, err := azidentity.NewDefaultAzureCredential(&azidentity.DefaultAzureCredentialOptions{})
@@ -75,15 +40,15 @@ func NewDriver(ctx context.Context, opts DriverOptions) (*Driver, error) {
 		return nil, err
 	}
 
-	azblobClient, err := service.NewClient(endpoint, credential, &service.ClientOptions{})
+	azblobClient, err := service.NewClient(uri.Host, credential, &service.ClientOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	return &Driver{
 		azblobClient: azblobClient,
-		bucket:       bucket,
-		objectPrefix: objectPrefix,
+		bucket:       uri.Bucket,
+		objectPrefix: uri.ObjectPrefix,
 	}, nil
 }
 
